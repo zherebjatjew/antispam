@@ -1,6 +1,10 @@
 *.class
+.idea
+gen
+out
 
 # Package Files #
 *.jar
 *.war
 *.ear
+local.properties
