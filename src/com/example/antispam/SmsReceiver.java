@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import com.example.antispam.dao.SmsDao;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,11 +21,14 @@ public class SmsReceiver extends BroadcastReceiver {
 	private static final String TAG = SmsReceiver.class.getSimpleName();
 	private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
 
-	private SmsFilter filter = new SmsFilter();
+	private SmsFilter filter;
+	private SmsDao dao;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (intent != null && ACTION.equals(intent.getAction())) {
+			dao = new SmsDao(context);
+			filter = new SmsFilter(dao);
 			SmsMessage smsMessage = extractSmsMessage(intent);
 			processMessage(context, smsMessage);
 		}

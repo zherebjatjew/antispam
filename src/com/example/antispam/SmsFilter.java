@@ -1,6 +1,7 @@
 package com.example.antispam;
 
 import android.telephony.SmsMessage;
+import com.example.antispam.dao.SmsDao;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,6 +11,11 @@ import android.telephony.SmsMessage;
  * To change this template use File | Settings | File Templates.
  */
 public class SmsFilter {
+	private SmsDao dao;
+
+	public SmsFilter(SmsDao dao) {
+		this.dao = dao;
+	}
 	public boolean isUnwelcome(SmsMessage message) {
 		String from = message.getOriginatingAddress();
 		if (isFromWhiteList(from)) return false;
