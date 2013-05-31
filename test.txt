@@ -1,0 +1,3 @@
+To send SMS to emulator from host machine execute:
+telnet localhost 5554
+sms send <number> <text>
