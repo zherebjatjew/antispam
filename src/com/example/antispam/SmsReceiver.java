@@ -37,13 +37,11 @@ public class SmsReceiver extends BroadcastReceiver {
 	private SmsMessage extractSmsMessage(Intent intent) {
 		Bundle pudsBundle = intent.getExtras();
 		Object[] pdus = (Object[]) pudsBundle.get("pdus");
-		SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdus[0]);
-		return smsMessage;
+		return SmsMessage.createFromPdu((byte[]) pdus[0]);
 	}
 
 	private void processMessage(Context context, SmsMessage smsMessage) {
-		Log.i(TAG, "Received SMS from " + smsMessage.getOriginatingAddress());
-		// Do some stuff here
+		Log.i(TAG, "Received SMS from " + smsMessage.getDisplayOriginatingAddress());
 		if (filter.isUnwelcome(smsMessage)) {
 			Log.i(TAG, "SMS rejected due to spam");
 			archiveMessage(smsMessage);
@@ -52,7 +50,9 @@ public class SmsReceiver extends BroadcastReceiver {
 	}
 
 	private void archiveMessage(SmsMessage smsMessage) {
-		//To change body of created methods use File | Settings | File Templates.
+		dao.putMessage(smsMessage.getDisplayOriginatingAddress(),
+				smsMessage.getTimestampMillis(),
+				smsMessage.getDisplayMessageBody());
 	}
 
 }

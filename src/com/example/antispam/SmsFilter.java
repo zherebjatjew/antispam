@@ -17,7 +17,7 @@ public class SmsFilter {
 		this.dao = dao;
 	}
 	public boolean isUnwelcome(SmsMessage message) {
-		String from = message.getOriginatingAddress();
+		String from = message.getDisplayOriginatingAddress();
 		if (isFromWhiteList(from)) return false;
 		if (isFromGateway(from)) return true;
 		if (isFromBlackList(from)) return true;

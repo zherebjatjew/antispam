@@ -1,5 +1,6 @@
 package com.example.antispam.dao;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -12,8 +13,18 @@ import android.database.sqlite.SQLiteDatabase;
  */
 public class SmsDao {
 	private SQLiteDatabase db;
+	private DbHelper helper;
+
+	public long putMessage(String from, long datetime, String body) {
+		ContentValues values = new ContentValues();
+		values.put(DbHelper.MESSAGES_FROM, from);
+		values.put(DbHelper.MESSAGES_DATETIME, datetime);
+		values.put(DbHelper.MESSAGES_BODY, body);
+		return db.insert(DbHelper.TABLE_MESSAGES, null, values);
+	}
 
 	public SmsDao(Context context) {
-		db = context.openOrCreateDatabase("db", Context.MODE_PRIVATE, null);
+		helper = new DbHelper(context);
+		db = helper.getWritableDatabase();
 	}
 }
