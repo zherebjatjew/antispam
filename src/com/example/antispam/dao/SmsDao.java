@@ -2,6 +2,7 @@ package com.example.antispam.dao;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 /**
@@ -21,6 +22,10 @@ public class SmsDao {
 		values.put(DbHelper.MESSAGES_DATETIME, datetime);
 		values.put(DbHelper.MESSAGES_BODY, body);
 		return db.insert(DbHelper.TABLE_MESSAGES, null, values);
+	}
+
+	public String getDeviceId() {
+		return helper.getMeta("deviceId");
 	}
 
 	public SmsDao(Context context) {

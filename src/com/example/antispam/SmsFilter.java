@@ -18,6 +18,8 @@ public class SmsFilter {
 	}
 	public boolean isUnwelcome(SmsMessage message) {
 		String from = message.getDisplayOriginatingAddress();
+		// TODO: Remove next line after debug
+		if ("+000".equals(from)) return true;
 		if (isFromWhiteList(from)) return false;
 		if (isFromGateway(from)) return true;
 		if (isFromBlackList(from)) return true;
