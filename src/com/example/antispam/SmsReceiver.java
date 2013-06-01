@@ -26,7 +26,7 @@ public class SmsReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		if (intent != null && ACTION.equals(intent.getAction())) {
 			dao = new SmsDao(context);
-			filter = new SmsFilter(dao);
+			filter = new SmsFilter(context, dao);
 			SmsMessage smsMessage = extractSmsMessage(intent);
 			processMessage(context, smsMessage);
 		}
