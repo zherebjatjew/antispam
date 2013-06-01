@@ -36,4 +36,6 @@ public class SmsDao {
 	public Cursor getSpamCursor() {
 		return db.rawQuery("SELECT * from `messages`", null);
 	}
+
+
 }

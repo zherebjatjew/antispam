@@ -21,8 +21,8 @@ public class SmsFilter {
 		// TODO: Remove next line after debug
 		if ("+000".equals(from)) return true;
 		if (isFromWhiteList(from)) return false;
-		if (isFromGateway(from)) return true;
 		if (isFromBlackList(from)) return true;
+		if (isFromGateway(from)) return true;
 		return false;
 	}
 

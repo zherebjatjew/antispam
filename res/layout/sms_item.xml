@@ -5,18 +5,35 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
 
-    <TextView
+    <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="New Text"
-            android:id="@+id/from"
-            android:layout_gravity="left|center_vertical"
-            android:singleLine="true"/>
+            android:layout_gravity="left|center_vertical">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2013-04-29"
+                android:id="@+id/date"
+                android:layout_alignParentRight="true"/>
+
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Sender"
+                android:id="@+id/from"
+                android:layout_gravity="left|center_vertical"
+                android:singleLine="true"
+                android:layout_alignParentLeft="true"
+                android:layout_toLeftOf="@+id/date"
+                android:textStyle="bold"/>
+
+    </RelativeLayout>
 
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="New Text"
+            android:text="Message body here."
             android:id="@+id/body"
             android:layout_gravity="left|center_vertical"/>
 
