@@ -38,4 +38,7 @@ public class SmsDao {
 	}
 
 
+	public boolean isInSpam(String sender) {
+		return !db.rawQuery("SELECT `_id` FROM `messages` WHERE `from`=? LIMIT 1", new String[]{sender}).isAfterLast();
+	}
 }

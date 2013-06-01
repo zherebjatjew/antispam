@@ -27,7 +27,7 @@ public class SmsFilter {
 	}
 
 	private boolean isFromBlackList(String sender) {
-		return false;
+		return dao.isInSpam(sender);
 	}
 
 	private boolean isFromWhiteList(String sender) {
