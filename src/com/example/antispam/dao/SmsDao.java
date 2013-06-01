@@ -32,4 +32,8 @@ public class SmsDao {
 		helper = new DbHelper(context);
 		db = helper.getWritableDatabase();
 	}
+
+	public Cursor getSpamCursor() {
+		return db.rawQuery("SELECT * from `messages`", null);
+	}
 }

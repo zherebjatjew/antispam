@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:background="#ffffff">
+              android:layout_height="fill_parent">
 
-    <LinearLayout
-            android:orientation="vertical"
+    <TextView
             android:layout_width="fill_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/from"
             android:layout_gravity="left|center_vertical"
-            android:id="@+id/header"
-            android:background="#f0f0f0">
-    </LinearLayout>
+            android:singleLine="true"/>
 
-    <ListView
+    <TextView
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/listView"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/body"
             android:layout_gravity="left|center_vertical"/>
-</LinearLayout>
 
+</LinearLayout>
