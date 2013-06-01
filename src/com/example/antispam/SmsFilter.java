@@ -46,13 +46,22 @@ public class SmsFilter {
 	}
 	public boolean isUnwelcome(SmsMessage message) {
 		String from = message.getDisplayOriginatingAddress();
-		// TODO: Remove next line after debug
 		if (isFromBlackList(from)) return true;
 		if (hasEverCalledTo(from)) return false;
+		if (hasEverMessagedTo(from)) return false;
+		// TODO: Remove next line after debug
 		if ("+000".equals(from)) return true;
 		if (isFromWhiteList(from)) return false;
 		if (isFromGateway(from)) return true;
 		return false;
+	}
+
+	private boolean hasEverMessagedTo(String from) {
+		final String SMS_URI_INBOX = "content://sms/inbox";
+		Uri uri = Uri.parse(SMS_URI_INBOX);
+		String[] projection = new String[] { "_id" };
+		Cursor cur = context.getContentResolver().query(uri, projection, "address=?", new String[]{Uri.encode(from)}, null);
+		return cur.isAfterLast();
 	}
 
 	private boolean hasEverCalledTo(String sender) {
