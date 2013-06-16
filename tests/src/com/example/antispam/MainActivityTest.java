@@ -8,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+
+import com.example.antispam.dao.SmsDao;
 import org.smslib.GSMAlphabet;
 
 /**
@@ -24,6 +26,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public MainActivityTest() {
 		super("com.example.antispam", MainActivity.class);
+	}
+
+	public void testBlackAndWhiteList() {
+		SmsDao dao = new SmsDao(getActivity());
+		final String sender = "990099";
+		assertNull(dao.isSenderASpammer(sender));
+		dao.markSender(sender, true);
+		assertTrue(dao.isSenderASpammer(sender));
+		dao.markSender(sender, false);
+		assertFalse(dao.isSenderASpammer(sender));
+		dao.markSender(sender, null);
+		assertNull(dao.isSenderASpammer(sender));
 	}
 
 	private void sendSMS(String sender, String body) throws IOException {

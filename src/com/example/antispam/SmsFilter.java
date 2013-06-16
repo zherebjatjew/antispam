@@ -44,6 +44,7 @@ public class SmsFilter {
 		this.dao = dao;
 		this.context = context;
 	}
+
 	public boolean isUnwelcome(SmsMessage message) {
 		String from = message.getDisplayOriginatingAddress();
 		if (isFromBlackList(from)) return true;
@@ -78,7 +79,11 @@ public class SmsFilter {
 	private boolean isFromBlackList(String sender) {
 		// Message is a spam if it's sender is in spam list
 		// TODO: Manage separate list of spammers to be able to clear spam list
-		return dao.isInSpam(sender);
+		if (dao.isInSpam(sender)) {
+			return true;
+		}
+		Boolean flaggedAsSpam = dao.isSenderASpammer(sender);
+		return  (flaggedAsSpam != null && flaggedAsSpam);
 	}
 
 	private boolean isFromWhiteList(String sender) {
@@ -86,6 +91,6 @@ public class SmsFilter {
 	}
 
 	private boolean isFromGateway(String sender) {
-		return false;
+		return !PhoneNumberUtils.isGlobalPhoneNumber(sender);
 	}
 }

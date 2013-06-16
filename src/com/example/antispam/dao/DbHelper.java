@@ -22,7 +22,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public final static String MESSAGES_BODY = "`body`";
 
 	private final static String DB_NAME = "db";
-	private final static int DB_VERSION = 1;
+	private final static int DB_VERSION = 2;
 	private final static String DB_CREATE =
 			"CREATE TABLE `messages` (`_id` INTEGER PRIMARY KEY, `from` VARCHAR(20) NOT NULL, `sentAt` DATETIME, `body` TEXT);" +
 			"CREATE TABLE `meta` (`_id` VARCHAR(20) PRIMARY KEY, `value` VARCHAR(150));" +
@@ -40,7 +40,10 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	@Override
-	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
+	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i1, int i2) {
+		if (i1 == 1 && i2 > 1) {
+			sqLiteDatabase.execSQL("CREATE TABLE `senders` (`_id` VARCHAR(20) PRIMARY KEY, `spam` BOOL, `addedAt` TIMESTAMP);");
+		}
 	}
 
 	public String getMeta(String key) {
