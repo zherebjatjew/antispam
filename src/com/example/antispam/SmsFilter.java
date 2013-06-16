@@ -6,8 +6,10 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
+import android.util.Log;
 import com.example.antispam.dao.SmsDao;
 
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -37,6 +39,7 @@ import java.util.regex.Pattern;
  * </table>
  */
 public class SmsFilter {
+	private final static String TAG = SmsFilter.class.getSimpleName();
 	private final SmsDao dao;
 	private final Context context;
 
@@ -47,13 +50,33 @@ public class SmsFilter {
 
 	public boolean isUnwelcome(SmsMessage message) {
 		String from = message.getDisplayOriginatingAddress();
-		if (isFromBlackList(from)) return true;
-		if (hasEverCalledTo(from)) return false;
-		if (hasEverMessagedTo(from)) return false;
+		Log.i(TAG, "Message from " + from);
+		if (isFromBlackList(from)) {
+			Log.i(TAG, "SPAM: sender is in black list");
+			return true;
+		}
+		if (hasEverCalledTo(from)) {
+			Log.i(TAG, "NOT SPAM: User has called to the sender");
+			return false;
+		}
+		if (hasEverMessagedTo(from)) {
+			Log.i(TAG, "NOT SPAM: User has written to the sender");
+			return false;
+		}
 		// TODO: Remove next line after debug
-		if ("+000".equals(from)) return true;
-		if (isFromWhiteList(from)) return false;
-		if (isFromGateway(from)) return true;
+		if ("+000".equals(from)) {
+			Log.i(TAG, "SPAM: Predefined black list");
+			return true;
+		}
+		if (isFromWhiteList(from)) {
+			Log.i(TAG, "NOT SPAM: in white list");
+			return false;
+		}
+		if (isFromGateway(from)) {
+			Log.i(TAG, "SPAM: Gateway address");
+			return true;
+		}
+		Log.i(TAG, "UNKNOWN status");
 		return false;
 	}
 
@@ -62,7 +85,7 @@ public class SmsFilter {
 		Uri uri = Uri.parse(SMS_URI_INBOX);
 		String[] projection = new String[] { "_id" };
 		Cursor cur = context.getContentResolver().query(uri, projection, "address=?", new String[]{Uri.encode(from)}, null);
-		return cur.isAfterLast();
+		return !cur.isAfterLast();
 	}
 
 	private boolean hasEverCalledTo(String sender) {
@@ -73,7 +96,7 @@ public class SmsFilter {
 		}
 		Uri numberUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(sender));
 		Cursor cur = context.getContentResolver().query(numberUri, new String[]{ContactsContract.PhoneLookup._ID}, null, null, null);
-		return cur.isAfterLast();
+		return !cur.isAfterLast();
 	}
 
 	private boolean isFromBlackList(String sender) {
