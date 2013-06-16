@@ -29,6 +29,7 @@ public class SmsReceiver extends BroadcastReceiver {
 			filter = new SmsFilter(context, dao);
 			SmsMessage smsMessage = extractSmsMessage(intent);
 			processMessage(context, smsMessage);
+			dao.close();
 		}
 	}
 

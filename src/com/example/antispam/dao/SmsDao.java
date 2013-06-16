@@ -79,4 +79,8 @@ public class SmsDao {
 			db.execSQL("REPLACE INTO `senders` (`_id`, `spam`) VALUES (?, ?)", new Object[]{from, spam?1:0});
 		}
 	}
+
+	public void close() {
+		db.close();
+	}
 }
