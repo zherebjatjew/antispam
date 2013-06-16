@@ -6,11 +6,12 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 import com.example.antispam.dao.SmsDao;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MainActivity extends Activity {
@@ -60,9 +60,9 @@ public class MainActivity extends Activity {
 			private final int minFlingVelocity;
 			private final int maxFlingVelocity;
 			private final int animationTime;
-			private int dismissAnimationRefCount = 0;
+			private boolean swiping = false;
 
-			private View swiping = null;
+			private View swipingView = null;
 
 			{
 				ViewConfiguration vc = ViewConfiguration.get(list.getContext());
@@ -79,10 +79,10 @@ public class MainActivity extends Activity {
 					case MotionEvent.ACTION_DOWN:
 						int[] coords = new int[2];
 						list.getLocationOnScreen(coords);
-						swiping = hitTest((int) (event.getRawX() - coords[0]), (int) (event.getRawY() - coords[1]));
-						if (swiping != null) {
+						swipingView = hitTest((int) (event.getRawX() - coords[0]), (int) (event.getRawY() - coords[1]));
+						if (swipingView != null) {
 							downX = event.getRawX();
-							downPosition = list.getPositionForView(swiping);
+							downPosition = list.getPositionForView(swipingView);
 							velocityTracker = VelocityTracker.obtain();
 							velocityTracker.addMovement(event);
 						}
@@ -107,9 +107,8 @@ public class MainActivity extends Activity {
 						}
 						if (dismiss) {
 							// dismiss
-							final View downView = swiping; // mDownView gets null'd before animation ends
-							final int downPosition = this.downPosition;
-							++dismissAnimationRefCount;
+							final int position = downPosition;
+							final boolean fDismissRight = dismissRight;
 /*
 							downView.animate()
 									.translationX(dismissRight ? mViewWidth : -mViewWidth)
@@ -122,12 +121,52 @@ public class MainActivity extends Activity {
 										}
 									});
 */
-							if (dismissRight) {
-								onSwipeRight(downPosition);
-							} else {
-								onSwipeLeft(downPosition);
-							}
+							TranslateAnimation ta = new TranslateAnimation(swipingView.getLeft(),
+									fDismissRight ? swipingView.getLeft() + swipingView.getWidth() :
+									swipingView.getLeft() - swipingView.getWidth(), 0, 0);
+							ta.setDuration(animationTime);
+							ta.setFillAfter(true);
+							ta.setAnimationListener(new Animation.AnimationListener() {
+								@Override
+								public void onAnimationStart(Animation animation) {
+								}
+
+								@Override
+								public void onAnimationEnd(Animation animation) {
+									if (fDismissRight) {
+										onDeleteMessage(downPosition);
+									} else {
+										onRestoreMessage(downPosition);
+									}
+									CursorAdapter adapter = (CursorAdapter)list.getAdapter();
+									adapter.changeCursor(dao.getSpamCursor());
+								}
+
+								@Override
+								public void onAnimationRepeat(Animation animation) {
+								}
+							});
+							swipingView.startAnimation(ta);
 						}
+						break;
+
+					case MotionEvent.ACTION_MOVE:
+						if (velocityTracker == null) {
+							break;
+						}
+
+						velocityTracker.addMovement(event);
+						float dX = event.getRawX() - downX;
+						if (Math.abs(dX) > slop) {
+							swiping = true;
+							list.requestDisallowInterceptTouchEvent(true);
+
+							// Cancel ListView's touch (un-highlighting the item)
+							MotionEvent cancelEvent = MotionEvent.obtain(event);
+							cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+							list.onTouchEvent(cancelEvent);
+						}
+
 						break;
 
 					default:
@@ -149,11 +188,9 @@ public class MainActivity extends Activity {
 				return null;
 			}
 
-			private void onSwipeLeft(int nItem) {
+			private void onRestoreMessage(int nItem) {
 				int id = getMessageId(nItem);
 				restoreMessage(id);
-				CursorAdapter adapter = (CursorAdapter)list.getAdapter();
-				adapter.changeCursor(dao.getSpamCursor());
 			}
 
 			private int getMessageId(int nItem) {
@@ -162,15 +199,19 @@ public class MainActivity extends Activity {
 				return cur.getInt(col);
 			}
 
-			private void onSwipeRight(int nItem) {
+			private void onDeleteMessage(int nItem) {
 				int id = getMessageId(nItem);
 				SmsModel message = dao.getMessage(id);
 				dao.deleteMessage(id);
 				dao.markSender(message.from, true);
-				CursorAdapter adapter = (CursorAdapter)list.getAdapter();
-				adapter.changeCursor(dao.getSpamCursor());
 			}
 		});
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		dao.close();
 	}
 
 	private void restoreMessage(int messageId) {
