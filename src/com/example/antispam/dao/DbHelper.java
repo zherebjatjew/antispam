@@ -22,11 +22,13 @@ public class DbHelper extends SQLiteOpenHelper {
 	public final static String MESSAGES_BODY = "`body`";
 
 	private final static String DB_NAME = "db";
-	private final static int DB_VERSION = 2;
+	private final static int DB_VERSION = 3;
+	public static final String CREATE_SENDERS_TABLE = "CREATE TABLE `senders` (`_id` VARCHAR(20) PRIMARY KEY, `spam` BOOL, `addedAt` TIMESTAMP);";
 	private final static String DB_CREATE =
 			"CREATE TABLE `messages` (`_id` INTEGER PRIMARY KEY, `from` VARCHAR(20) NOT NULL, `sentAt` DATETIME, `body` TEXT);" +
 			"CREATE TABLE `meta` (`_id` VARCHAR(20) PRIMARY KEY, `value` VARCHAR(150));" +
-			"INSERT INTO `meta` (`name`, `value`) VALUES ('deviceId', '%s');";
+			"INSERT INTO `meta` (`name`, `value`) VALUES ('deviceId', '%s'); " +
+			CREATE_SENDERS_TABLE;
 	private final static String SQL_GET_META = "SELECT `value` FROM `meta` WHERE `_id`='?'";
 
 	public DbHelper(Context context) {
@@ -41,8 +43,8 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i1, int i2) {
-		if (i1 == 1 && i2 > 1) {
-			sqLiteDatabase.execSQL("CREATE TABLE `senders` (`_id` VARCHAR(20) PRIMARY KEY, `spam` BOOL, `addedAt` TIMESTAMP);");
+		if (i1 == 2 && i2 > 1) {
+			sqLiteDatabase.execSQL(CREATE_SENDERS_TABLE);
 		}
 	}
 
