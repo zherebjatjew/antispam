@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">antispam</string>
+    <string name="app_name">antispam</string><string name="swype_left_hint"><![CDATA[<< to inbox]]></string><string name="swype_right_hint"><![CDATA[to trash >>]]></string>
 </resources>
