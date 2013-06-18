@@ -9,9 +9,6 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 import com.example.antispam.dao.SmsDao;
 
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
 /**
  * Created with IntelliJ IDEA.
  * User: dj
@@ -39,7 +36,7 @@ import java.util.regex.Pattern;
  * </table>
  */
 public class SmsFilter {
-	private final static String TAG = SmsFilter.class.getSimpleName();
+	private static final String TAG = SmsFilter.class.getSimpleName();
 	private final SmsDao dao;
 	private final Context context;
 
@@ -76,16 +73,37 @@ public class SmsFilter {
 			Log.i(TAG, "SPAM: Gateway address");
 			return true;
 		}
+		if (hasMessagesFrom(from)) {
+			Log.i(TAG, "NOT SPAM: found message(s) in inbox");
+			return false;
+		}
 		Log.i(TAG, "UNKNOWN status");
 		return false;
 	}
 
-	private boolean hasEverMessagedTo(String from) {
+	private boolean hasMessagesFrom(String sender) {
+		// The same as in hasEverMessagedTo
+/*
 		final String SMS_URI_INBOX = "content://sms/inbox";
 		Uri uri = Uri.parse(SMS_URI_INBOX);
 		String[] projection = new String[] { "_id" };
-		Cursor cur = context.getContentResolver().query(uri, projection, "address=?", new String[]{Uri.encode(from)}, null);
-		return !cur.isAfterLast();
+		Cursor cur = context.getContentResolver().query(uri, projection, "address=?", new String[]{Uri.encode(sender)}, null);
+		try {
+			return !cur.isAfterLast();
+		} finally {
+			if (cur != null) cur.close();
+		}
+*/
+		return false;
+	}
+
+	private boolean hasEverMessagedTo(String from) {
+		Cursor cur = context.getContentResolver().query(Uri.parse("content://sms"), new String[]{"address"}, "address=?", new String[]{from}, null);
+		try {
+			return !cur.isAfterLast();
+		} finally {
+			if (cur != null) cur.close();
+		}
 	}
 
 	private boolean hasEverCalledTo(String sender) {
