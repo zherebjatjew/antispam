@@ -198,8 +198,12 @@ public class MainActivity extends Activity {
 
 			private int getMessageId(int nItem) {
 				Cursor cur = (Cursor)list.getAdapter().getItem(nItem);
-				int col = cur.getColumnIndex("_id");
-				return cur.getInt(col);
+				try {
+					int col = cur.getColumnIndex("_id");
+					return cur.getInt(col);
+				} finally {
+					cur.close();
+				}
 			}
 
 			private void onDeleteMessage(int nItem) {

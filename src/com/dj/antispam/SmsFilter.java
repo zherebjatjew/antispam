@@ -103,7 +103,11 @@ public class SmsFilter {
 		}
 		Uri numberUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(sender));
 		Cursor cur = context.getContentResolver().query(numberUri, new String[]{ContactsContract.PhoneLookup._ID}, null, null, null);
-		return !cur.isAfterLast();
+		try {
+			return !cur.isAfterLast();
+		} finally {
+			cur.close();
+		}
 	}
 
 	private boolean isFromBlackList(String sender) {

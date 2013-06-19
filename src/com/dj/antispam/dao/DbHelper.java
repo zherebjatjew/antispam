@@ -47,7 +47,11 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	public String getMeta(String key) {
-		Cursor cur = this.getReadableDatabase().rawQuery(SQL_GET_META, new String[]{key});
-		return cur.getString(0);
+		Cursor cur = getReadableDatabase().rawQuery(SQL_GET_META, new String[]{key});
+		try {
+			return cur.getString(0);
+		} finally {
+			cur.close();
+		}
 	}
 }

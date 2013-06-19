@@ -46,16 +46,20 @@ public class SmsDao {
 	public SmsModel getMessage(int messageId) {
 		Cursor cur = db.rawQuery("SELECT `_id`, `from`, `sentAt`, `body` FROM `messages` WHERE `_id`=?",
 				new String[]{Integer.toString(messageId)});
-		if (cur.isAfterLast()) {
-			throw new IllegalArgumentException("No message with id " + messageId);
+		try {
+			if (cur.isAfterLast()) {
+				throw new IllegalArgumentException("No message with id " + messageId);
+			}
+			cur.moveToFirst();
+			SmsModel result = new SmsModel();
+			result.id = cur.getInt(0);
+			result.from = cur.getString(1);
+			result.sentAt = cur.getLong(2);
+			result.body = cur.getString(3);
+			return result;
+		} finally {
+			cur.close();
 		}
-		cur.moveToFirst();
-		SmsModel result = new SmsModel();
-		result.id = cur.getInt(0);
-		result.from = cur.getString(1);
-		result.sentAt = cur.getLong(2);
-		result.body = cur.getString(3);
-		return result;
 	}
 
 	public void deleteMessage(int messageId) {
@@ -64,11 +68,15 @@ public class SmsDao {
 
 	public Boolean isSenderASpammer(String sender) {
 		Cursor cur = db.rawQuery("SELECT `_id`, `spam` FROM `senders` WHERE `_id`=?", new String[]{sender});
-		if (cur.isAfterLast()) {
-			return null;
-		} else {
-			cur.moveToFirst();
-			return cur.getInt(1) == 1;
+		try {
+			if (cur.isAfterLast()) {
+				return null;
+			} else {
+				cur.moveToFirst();
+				return cur.getInt(1) == 1;
+			}
+		} finally {
+			cur.close();
 		}
 	}
 
