@@ -39,12 +39,14 @@ public class SmsReceiver extends BroadcastReceiver {
 		return SmsMessage.createFromPdu((byte[]) pdus[0]);
 	}
 
-	private void processMessage(Context context, SmsMessage smsMessage) {
+	private void processMessage(final Context context, final SmsMessage smsMessage) {
 		Log.i(TAG, "Received SMS from " + smsMessage.getDisplayOriginatingAddress());
 		if (filter.isUnwelcome(smsMessage)) {
 			Log.i(TAG, "SMS rejected due to spam");
 			archiveMessage(smsMessage);
 			abortBroadcast();
+			Intent intent = new Intent(context.getResources().getString(R.string.update_action));
+			context.sendBroadcast(intent);
 		}
 	}
 

@@ -1,11 +1,12 @@
 package com.example.antispam;
 
 import android.app.Activity;
-import android.content.ContentValues;
+import android.content.*;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -24,19 +25,21 @@ import java.util.Date;
 public class MainActivity extends Activity {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private SmsDao dao;
+	private BroadcastReceiver updater;
+
+
 	/**
 	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		dao = new SmsDao(this);
 		setContentView(R.layout.main);
 		final ListView list = (ListView)findViewById(R.id.listView);
 		Cursor cursor = dao.getSpamCursor();
 		startManagingCursor(cursor);
-		CursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.sms_item, cursor,
+		final CursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.sms_item, cursor,
 				new String[] {"from", "body", "sentAt"},
 				new int[] {R.id.from, R.id.body, R.id.date})
 		{
@@ -206,6 +209,30 @@ public class MainActivity extends Activity {
 				dao.markSender(message.from, true);
 			}
 		});
+
+		updater = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				Log.d(TAG, "Update spam list intent has been received");
+				// Wait for record updated is complete or you'll get empty record
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {}
+				adapter.changeCursor(dao.getSpamCursor());
+			}
+		};
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		registerReceiver(updater, new IntentFilter(getResources().getString(R.string.update_action)));
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		unregisterReceiver(updater);
 	}
 
 	@Override

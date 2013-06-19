@@ -16,24 +16,6 @@ import com.example.antispam.dao.SmsDao;
  * Time: 21:38
  *
  * Determines if message is a spam or not.
- * <table>
- *     <tr>
- *         <th>Spam</th>
- *         <th>Not spam</th>
- *     </tr>
- *     <tr>
- *         <td>Spam list already has this sender</td>
- *         <td>Sender is in contact list</td>
- *     </tr>
- *     <tr>
- *         <td>&nbsp;</td>
- *         <td>User has ever wrote to the sender</td>
- *     </tr>
- *     <tr>
- *         <td>&nbsp;</td>
- *         <td>User has ever called the sender</td>
- *     </tr>
- * </table>
  */
 public class SmsFilter {
 	private static final String TAG = SmsFilter.class.getSimpleName();
@@ -100,6 +82,13 @@ public class SmsFilter {
 	private boolean hasEverMessagedTo(String from) {
 		Cursor cur = context.getContentResolver().query(Uri.parse("content://sms"), new String[]{"address"}, "address=?", new String[]{from}, null);
 		try {
+/*
+			if (cur.moveToFirst()) {
+				for (int i = 0; i < cur.getColumnCount(); i++) {
+					Log.v(TAG, cur.getColumnName(i) + " = " + cur.getString(i));
+				}
+			}
+*/
 			return !cur.isAfterLast();
 		} finally {
 			if (cur != null) cur.close();
