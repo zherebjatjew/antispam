@@ -1,4 +1,4 @@
-package com.example.antispam;
+package com.dj.antispam;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package com.example.antispam;
+package com.dj.antispam;
 
 import android.app.Activity;
 import android.content.*;
@@ -17,7 +17,7 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import com.example.antispam.dao.SmsDao;
+import com.dj.antispam.dao.SmsDao;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -26,6 +26,7 @@ public class MainActivity extends Activity {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private SmsDao dao;
 	private BroadcastReceiver updater;
+	private Cursor cursor;
 
 
 	/**
@@ -37,7 +38,7 @@ public class MainActivity extends Activity {
 		dao = new SmsDao(this);
 		setContentView(R.layout.main);
 		final ListView list = (ListView)findViewById(R.id.listView);
-		Cursor cursor = dao.getSpamCursor();
+		cursor = dao.getSpamCursor();
 		startManagingCursor(cursor);
 		final CursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.sms_item, cursor,
 				new String[] {"from", "body", "sentAt"},
@@ -141,8 +142,7 @@ public class MainActivity extends Activity {
 									} else {
 										onRestoreMessage(downPosition);
 									}
-									CursorAdapter adapter = (CursorAdapter)list.getAdapter();
-									adapter.changeCursor(dao.getSpamCursor());
+									updater.onReceive(getApplicationContext(), new Intent(getResources().getString(R.string.update_action)));
 								}
 
 								@Override
@@ -218,7 +218,10 @@ public class MainActivity extends Activity {
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException e) {}
-				adapter.changeCursor(dao.getSpamCursor());
+				stopManagingCursor(cursor);
+				cursor = dao.getSpamCursor();
+				startManagingCursor(cursor);
+				adapter.changeCursor(cursor);
 			}
 		};
 	}

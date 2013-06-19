@@ -3,5 +3,5 @@
     <string name="app_name">antispam</string>
     <string name="swype_left_hint"><![CDATA[<< to inbox]]></string>
     <string name="swype_right_hint"><![CDATA[to trash >>]]></string>
-    <string name="update_action">com.example.antispam.SPAM_LIST_CHANGED</string>
+    <string name="update_action">com.dj.antispam.SPAM_LIST_CHANGED</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.antispam.dao;
+package com.dj.antispam.dao;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -15,21 +15,20 @@ import java.util.UUID;
  * To change this template use File | Settings | File Templates.
  */
 public class DbHelper extends SQLiteOpenHelper {
-	public final static String TABLE_MESSAGES = "messages";
-	public final static String MESSAGES_ID = "_id";
-	public final static String MESSAGES_FROM = "`from`";
-	public final static String MESSAGES_DATETIME = "sentAt";
-	public final static String MESSAGES_BODY = "`body`";
+	public static final String TABLE_MESSAGES = "messages";
+	public static final String MESSAGES_ID = "_id";
+	public static final String MESSAGES_FROM = "`from`";
+	public static final String MESSAGES_DATETIME = "sentAt";
+	public static final String MESSAGES_BODY = "`body`";
 
-	private final static String DB_NAME = "db";
-	private final static int DB_VERSION = 3;
+	private static final String DB_NAME = "db";
+	private static final int DB_VERSION = 1;
 	public static final String CREATE_SENDERS_TABLE = "CREATE TABLE `senders` (`_id` VARCHAR(20) PRIMARY KEY, `spam` BOOL, `addedAt` TIMESTAMP);";
-	private final static String DB_CREATE =
+	private static final String DB_CREATE =
 			"CREATE TABLE `messages` (`_id` INTEGER PRIMARY KEY, `from` VARCHAR(20) NOT NULL, `sentAt` DATETIME, `body` TEXT);" +
 			"CREATE TABLE `meta` (`_id` VARCHAR(20) PRIMARY KEY, `value` VARCHAR(150));" +
-			"INSERT INTO `meta` (`name`, `value`) VALUES ('deviceId', '%s'); " +
-			CREATE_SENDERS_TABLE;
-	private final static String SQL_GET_META = "SELECT `value` FROM `meta` WHERE `_id`='?'";
+			"INSERT INTO `meta` (`name`, `value`) VALUES ('deviceId', '%s'); ";
+	private static final String SQL_GET_META = "SELECT `value` FROM `meta` WHERE `_id`='?'";
 
 	public DbHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -39,13 +38,12 @@ public class DbHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase sqLiteDatabase) {
 		String query = String.format(DB_CREATE, UUID.randomUUID().toString());
 		sqLiteDatabase.execSQL(query);
+		sqLiteDatabase.execSQL(CREATE_SENDERS_TABLE);
+		sqLiteDatabase.rawQuery("SELECT * FROM `senders`", null);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i1, int i2) {
-		if (i1 == 2 && i2 > 1) {
-			sqLiteDatabase.execSQL(CREATE_SENDERS_TABLE);
-		}
 	}
 
 	public String getMeta(String key) {

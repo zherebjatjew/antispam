@@ -1,10 +1,10 @@
-package com.example.antispam.dao;
+package com.dj.antispam.dao;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import com.example.antispam.SmsModel;
+import com.dj.antispam.SmsModel;
 
 /**
  * Created with IntelliJ IDEA.

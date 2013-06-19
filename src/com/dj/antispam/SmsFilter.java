@@ -1,4 +1,4 @@
-package com.example.antispam;
+package com.dj.antispam;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,7 +7,7 @@ import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
 import android.util.Log;
-import com.example.antispam.dao.SmsDao;
+import com.dj.antispam.dao.SmsDao;
 
 /**
  * Created with IntelliJ IDEA.
