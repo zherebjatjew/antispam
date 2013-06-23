@@ -19,6 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+                android:name=".ImportActivity"
+                android:theme="@android:style/Theme.NoTitleBar"/>
         <receiver
             android:name=".SmsReceiver"
             android:enabled="true"

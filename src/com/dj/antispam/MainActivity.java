@@ -228,6 +228,8 @@ public class MainActivity extends Activity {
 				adapter.changeCursor(cursor);
 			}
 		};
+
+		startActivityForResult(new Intent(this, ImportActivity.class), ImportActivity.FIRST_IMPORT);
 	}
 
 	@Override
