@@ -229,7 +229,18 @@ public class MainActivity extends Activity {
 			}
 		};
 
-		startActivityForResult(new Intent(this, ImportActivity.class), ImportActivity.FIRST_IMPORT);
+		importFromExistingMessages();
+	}
+
+	private void importFromExistingMessages() {
+		SharedPreferences prefs = getSharedPreferences("antispamImport", Context.MODE_PRIVATE);
+		int value = prefs.getInt("antispamImport", 0);
+		if (value == 0) {
+			SharedPreferences.Editor editor = prefs.edit();
+			editor.putInt("antispamImport", 1);
+			editor.commit();
+			startActivityForResult(new Intent(this, ImportActivity.class), ImportActivity.FIRST_IMPORT);
+		}
 	}
 
 	@Override
