@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import com.dj.antispam.SmsModel;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: dj
@@ -88,7 +91,44 @@ public class SmsDao {
 		}
 	}
 
+	public void markSender(List<String> senders, final Boolean spam) {
+		if (spam == null) {
+			db.execSQL("DELETE FROM `senders` WHERE `_id` IN (" + join(senders, new Processor() {
+				@Override
+				public void format(StringBuilder builder, Object item) {
+					builder.append(item);
+				}
+			}) + ")");
+		} else {
+			db.execSQL("REPLACE INTO `senders` (`_id`, `spam`) VALUES " + join(senders, new Processor() {
+				@Override
+				public void format(StringBuilder builder, Object item) {
+					builder.append("('");
+					builder.append((String)item);
+					builder.append("',");
+					builder.append(spam ? "1" : "0");
+					builder.append(')');
+				}
+			}));
+		}
+	}
+
 	public void close() {
 		db.close();
+	}
+
+	private String join(List items, Processor processor) {
+		StringBuilder res = new StringBuilder();
+		for (int i = 0; i < items.size(); i++) {
+			processor.format(res, items.get(i));
+			if (i < items.size()-1) {
+				res.append(",");
+			}
+		}
+		return res.toString();
+	}
+
+	private interface Processor {
+		void format(StringBuilder builder, Object item);
 	}
 }
