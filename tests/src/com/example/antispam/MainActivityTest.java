@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import com.example.antispam.dao.SmsDao;
+import com.dj.antispam.MainActivity;
+import com.dj.antispam.dao.SmsDao;
 import org.smslib.GSMAlphabet;
 
 /**
