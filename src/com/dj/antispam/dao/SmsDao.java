@@ -3,6 +3,7 @@ package com.dj.antispam.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import com.dj.antispam.SmsModel;
 import com.dj.antispam.Utils;
@@ -101,16 +102,9 @@ public class SmsDao {
 				}
 			}) + ")");
 		} else {
-			db.execSQL("REPLACE INTO `senders` (`_id`, `spam`) VALUES " + Utils.join(senders, new Utils.Processor() {
-				@Override
-				public void format(StringBuilder builder, Object item) {
-					builder.append("('");
-					builder.append((String) item);
-					builder.append("',");
-					builder.append(spam ? "1" : "0");
-					builder.append(')');
-				}
-			}));
+			for (String item : senders) {
+				db.execSQL("REPLACE INTO `senders` (`_id`, `spam`) VALUES (" + DatabaseUtils.sqlEscapeString(item) + "," + (spam ? "1" : "0") + ')');
+			};
 		}
 	}
 

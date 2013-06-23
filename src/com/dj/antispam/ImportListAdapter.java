@@ -8,6 +8,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,38 +20,110 @@ import java.util.List;
  */
 public class ImportListAdapter extends BaseAdapter {
 
-	private final List<SenderStatus> senders;
+	private List<SenderStatus> senders;
 	private final Activity activity;
+	private final SmsImporter importer;
+	private volatile Boolean terminate = false;
 
-	public ImportListAdapter(Activity activity, List<SenderStatus> senders) {
+	private class Item {
+		SenderStatus status;
+		CheckBox view;
+	}
+	private final Queue<Item> itemsToUpdate = new LinkedBlockingQueue<Item>();
+	private Thread itemUpdater;
+
+	public ImportListAdapter(Activity activity, SmsImporter importer) {
 		this.activity = activity;
-		this.senders = senders;
+		this.importer = importer;
+	}
+
+	private List<SenderStatus> getSenders() {
+		if (senders == null) {
+			senders = importer.collect();
+		}
+		return senders;
+	}
+
+	public void close() {
+		terminate = true;
+		try {
+			synchronized (terminate) {
+				terminate.wait();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
 	}
 
 	@Override
 	public int getCount() {
-		return senders.size();
+		return getSenders().size();
 	}
 
 	@Override
 	public Object getItem(int i) {
-		return senders.get(i);
+		return getSenders().get(i);
 	}
 
 	@Override
 	public long getItemId(int i) {
-		return senders.get(i).address.hashCode();
+		return getSenders().get(i).address.hashCode();
 	}
 
 	@Override
 	public View getView(int i, View view, ViewGroup viewGroup) {
-		final SenderStatus status = senders.get(i);
+		final SenderStatus status = getSenders().get(i);
 		final View res = activity.getLayoutInflater().inflate(R.layout.import_item, viewGroup, false);
 		final CheckBox text = (CheckBox) res.findViewById(R.id.sender);
 		final TextView count = (TextView) res.findViewById(R.id.messageCount);
 
 		text.setText(status.address);
-		text.setChecked(status.isSpam);
+		text.setChecked(status.isSpam != null && status.isSpam);
+		if (status.isSpam == null) {
+			if (itemUpdater == null) {
+				itemUpdater = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						while (true) {
+							try {
+								synchronized (terminate) {
+									terminate.wait();
+								}
+							} catch (InterruptedException e) {
+								break;
+							}
+							if (terminate) {
+								synchronized (terminate) {
+									terminate.notify();
+								}
+								break;
+							}
+							while (!itemsToUpdate.isEmpty()) {
+								final Item item;
+								item = (Item)itemsToUpdate.poll();
+								if (item != null && item.status.isSpam == null) {
+									item.status.isSpam = importer.checkSpam(item.status);
+									activity.runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											item.view.setChecked(item.status.isSpam);
+										}
+									});
+								}
+							}
+						}
+					}
+				});
+				itemUpdater.start();
+			}
+			Item itm = new Item();
+			itm.status = status;
+			itm.view = text;
+			itemsToUpdate.add(itm);
+			synchronized (terminate) {
+				terminate.notify();
+			}
+		}
 		count.setText(Integer.toString(status.count));
 
 		return res;

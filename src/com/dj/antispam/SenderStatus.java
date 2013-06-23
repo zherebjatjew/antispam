@@ -9,7 +9,7 @@ package com.dj.antispam;
  */
 public class SenderStatus {
 	public String address;
-	public boolean isSpam;
+	public Boolean isSpam;
 	public int count;
 	public Boolean read;
 

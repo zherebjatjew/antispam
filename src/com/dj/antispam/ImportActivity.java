@@ -3,6 +3,7 @@ package com.dj.antispam;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -41,7 +42,7 @@ public class ImportActivity extends Activity {
 		setContentView(R.layout.importer);
 		final ListView senders = (ListView) findViewById(R.id.listView);
 		final List<SenderStatus> senderStates = getSenderStates();
-		adapter = new ImportListAdapter(this, senderStates);
+		adapter = new ImportListAdapter(this, importer);
 		senders.setAdapter(adapter);
 	}
 
@@ -51,6 +52,7 @@ public class ImportActivity extends Activity {
 		if (dao != null) {
 			dao.close();
 		}
+		adapter.close();
 	}
 
 	private List<SenderStatus> getSenderStates() {
@@ -92,7 +94,7 @@ public class ImportActivity extends Activity {
 		String where = "address IN (" + Utils.join(senders, new Utils.Processor() {
 			@Override
 			public void format(StringBuilder builder, Object item) {
-				builder.append((String) item);
+				builder.append(DatabaseUtils.sqlEscapeString((String) item));
 			}
 		}) + ")";
 		Cursor cur = getContentResolver().query(Uri.parse(Utils.URI_INBOX),

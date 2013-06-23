@@ -27,7 +27,7 @@ public class SmsFilter {
 		this.context = context;
 	}
 
-	public boolean isUnwelcome(String from, boolean checkInbox) {
+	public boolean isUnwelcome(String from) {
 		Log.i(TAG, "Message from " + from);
 		if (isFromBlackList(from)) {
 			Log.i(TAG, "SPAM: sender is in black list");
@@ -37,7 +37,7 @@ public class SmsFilter {
 			Log.i(TAG, "NOT SPAM: User has called to the sender");
 			return false;
 		}
-		if (checkInbox && hasEverMessagedTo(from)) {
+		if (hasEverMessagedTo(from)) {
 			Log.i(TAG, "NOT SPAM: User has written to the sender");
 			return false;
 		}

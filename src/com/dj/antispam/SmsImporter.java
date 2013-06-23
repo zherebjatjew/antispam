@@ -26,7 +26,7 @@ public class SmsImporter {
 
 	public List<SenderStatus> collect() {
 		Cursor cur = context.getContentResolver().query(Uri.parse(Utils.URI_INBOX),
-				new String[]{"address", "read"}, null, null, null);
+				new String[]{"address", "read"}, null, null, "date DESC");
 		Map<String, SenderStatus> result = new HashMap<String, SenderStatus>();
 		if (cur.moveToFirst()) {
 			do {
@@ -47,17 +47,19 @@ public class SmsImporter {
 				}
 			} while (cur.moveToNext());
 		}
+/*
 		for (SenderStatus status : result.values()) {
 			status.isSpam = checkSpam(status);
 		}
+*/
 		return new ArrayList<SenderStatus>(result.values());
 	}
 
-	private boolean checkSpam(SenderStatus status) {
-		if (filter.isUnwelcome(status.address, false)) {
+	public boolean checkSpam(SenderStatus status) {
+		if (!PhoneNumberUtils.isGlobalPhoneNumber(status.address)) {
 			return true;
 		}
-		if (!status.read && status.count == 1) {
+		if (status.read != null && !status.read && status.count == 1) {
 			return true;
 		}
 		return false;
