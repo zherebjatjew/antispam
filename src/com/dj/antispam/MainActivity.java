@@ -250,6 +250,11 @@ public class MainActivity extends Activity {
 		dao.close();
 	}
 
+	@Override
+	protected void onActivityResult(int code, int result, Intent intent) {
+		Log.d(TAG, "Activity has closed");
+	}
+
 	private void restoreMessage(int messageId) {
 		SmsModel message = dao.getMessage(messageId);
 		ContentValues values = new ContentValues();
