@@ -27,8 +27,7 @@ public class SmsFilter {
 		this.context = context;
 	}
 
-	public boolean isUnwelcome(SmsMessage message) {
-		String from = message.getDisplayOriginatingAddress();
+	public boolean isUnwelcome(String from, boolean checkInbox) {
 		Log.i(TAG, "Message from " + from);
 		if (isFromBlackList(from)) {
 			Log.i(TAG, "SPAM: sender is in black list");
@@ -38,7 +37,7 @@ public class SmsFilter {
 			Log.i(TAG, "NOT SPAM: User has called to the sender");
 			return false;
 		}
-		if (hasEverMessagedTo(from)) {
+		if (checkInbox && hasEverMessagedTo(from)) {
 			Log.i(TAG, "NOT SPAM: User has written to the sender");
 			return false;
 		}
@@ -55,40 +54,13 @@ public class SmsFilter {
 			Log.i(TAG, "SPAM: Gateway address");
 			return true;
 		}
-		if (hasMessagesFrom(from)) {
-			Log.i(TAG, "NOT SPAM: found message(s) in inbox");
-			return false;
-		}
 		Log.i(TAG, "UNKNOWN status");
 		return false;
 	}
 
-	private boolean hasMessagesFrom(String sender) {
-		// The same as in hasEverMessagedTo
-/*
-		final String SMS_URI_INBOX = "content://sms/inbox";
-		Uri uri = Uri.parse(SMS_URI_INBOX);
-		String[] projection = new String[] { "_id" };
-		Cursor cur = context.getContentResolver().query(uri, projection, "address=?", new String[]{Uri.encode(sender)}, null);
-		try {
-			return !cur.isAfterLast();
-		} finally {
-			if (cur != null) cur.close();
-		}
-*/
-		return false;
-	}
-
 	private boolean hasEverMessagedTo(String from) {
-		Cursor cur = context.getContentResolver().query(Uri.parse("content://sms"), new String[]{"address"}, "address=?", new String[]{from}, null);
+		Cursor cur = context.getContentResolver().query(Uri.parse(Utils.URI_SMS), new String[]{"address"}, "address=?", new String[]{from}, null);
 		try {
-/*
-			if (cur.moveToFirst()) {
-				for (int i = 0; i < cur.getColumnCount(); i++) {
-					Log.v(TAG, cur.getColumnName(i) + " = " + cur.getString(i));
-				}
-			}
-*/
 			return !cur.isAfterLast();
 		} finally {
 			if (cur != null) cur.close();

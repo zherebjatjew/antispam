@@ -41,7 +41,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
 	private void processMessage(final Context context, final SmsMessage smsMessage) {
 		Log.i(TAG, "Received SMS from " + smsMessage.getDisplayOriginatingAddress());
-		if (filter.isUnwelcome(smsMessage)) {
+		if (filter.isUnwelcome(smsMessage.getDisplayOriginatingAddress(), true)) {
 			Log.i(TAG, "SMS rejected due to spam");
 			archiveMessage(smsMessage);
 			abortBroadcast();

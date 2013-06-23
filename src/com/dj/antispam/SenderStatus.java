@@ -11,10 +11,10 @@ public class SenderStatus {
 	public String address;
 	public boolean isSpam;
 	public int count;
+	public Boolean read;
 
-	public SenderStatus(String address, boolean isSpam, int count) {
+	public SenderStatus(String address, int count) {
 		this.address = address;
-		this.isSpam = isSpam;
 		this.count = count;
 	}
 }

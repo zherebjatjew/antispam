@@ -247,7 +247,9 @@ public class MainActivity extends Activity {
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
-		dao.close();
+		if (dao != null) {
+			dao.close();
+		}
 	}
 
 	@Override
@@ -262,7 +264,7 @@ public class MainActivity extends Activity {
 		values.put("body", message.body);
 		values.put("read", true);
 		values.put("date", message.sentAt);
-		getContentResolver().insert(Uri.parse("content://sms/inbox"), values);
+		getContentResolver().insert(Uri.parse(Utils.URI_INBOX), values);
 		dao.deleteMessage(messageId);
 	}
 

@@ -2,6 +2,8 @@ package com.dj.antispam;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -25,12 +27,16 @@ public class ImportActivity extends Activity {
 	public static final int FIRST_IMPORT = 1;
 
 	private ImportListAdapter adapter;
+	private SmsDao dao;
+	private SmsImporter importer;
 
 	/**
 	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		dao = new SmsDao(this);
+		importer = new SmsImporter(this, dao);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.importer);
 		final ListView senders = (ListView) findViewById(R.id.listView);
@@ -39,10 +45,16 @@ public class ImportActivity extends Activity {
 		senders.setAdapter(adapter);
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		if (dao != null) {
+			dao.close();
+		}
+	}
+
 	private List<SenderStatus> getSenderStates() {
-		final List<SenderStatus> res = new ArrayList<SenderStatus>();
-		res.add(new SenderStatus("+000", true, 1));
-		res.add(new SenderStatus("Julia", false, 2));
+		final List<SenderStatus> res = importer.collect();
 		return res;
 	}
 
@@ -65,14 +77,38 @@ public class ImportActivity extends Activity {
 				}
 				dao.markSender(denied, true);
 				dao.markSender(allowed, false);
+				moveToSpam(dao, denied);
 				Intent intent = new Intent(getResources().getString(R.string.update_action));
 				sendBroadcast(intent);
-
+				dao.close();
 			}
 		}).start();
 
 		setResult(RESULT_OK);
 		finish();
+	}
+
+	private void moveToSpam(SmsDao dao, List<String> senders) {
+		String where = "address IN (" + Utils.join(senders, new Utils.Processor() {
+			@Override
+			public void format(StringBuilder builder, Object item) {
+				builder.append((String) item);
+			}
+		}) + ")";
+		Cursor cur = getContentResolver().query(Uri.parse(Utils.URI_INBOX),
+				new String[]{"address, body, date"}, where, null, null);
+		try {
+			if (cur.moveToFirst()) {
+				do {
+					dao.putMessage(cur.getString(0),
+							cur.getLong(2),
+							cur.getString(1));
+				} while (cur.moveToNext());
+			}
+			getContentResolver().delete(Uri.parse(Utils.URI_SMS), where, null);
+		} finally {
+			cur.close();
+		}
 	}
 
 	public void onCancel(View view) {
