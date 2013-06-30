@@ -10,26 +10,34 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
-        <TableRow
+        <RelativeLayout
+                android:orientation="vertical"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/header"
+                android:background="#f0f0f0"
+                >
 
-            <Button
-                    android:layout_width="0dp"
+            <ImageButton
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ok"
                     android:id="@+id/okButton"
-                    android:layout_weight="1"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@drawable/navigation_accept"
                     android:onClick="onOk"/>
 
-            <Button
-                    android:layout_width="0dp"
+            <ImageButton
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/cancel"
                     android:id="@+id/cancelButton"
-                    android:layout_weight="1"
-                    android:onClick="onCancel"/>
-        </TableRow>
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:onClick="onCancel"
+                    android:background="@drawable/navigation_cancel"/>
+        </RelativeLayout>
 
         <ListView
                 android:layout_width="fill_parent"

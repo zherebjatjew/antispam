@@ -78,7 +78,6 @@ public class MainActivity extends Activity {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:
 						int[] coords = new int[2];
@@ -218,9 +217,6 @@ public class MainActivity extends Activity {
 			public void onReceive(Context context, Intent intent) {
 				Log.d(TAG, "Update spam list intent has been received");
 				// Wait for record updated is complete or you'll get empty record
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {}
 				stopManagingCursor(cursor);
 				cursor = dao.getSpamCursor();
 				startManagingCursor(cursor);
