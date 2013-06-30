@@ -1,6 +1,11 @@
 package com.dj.antispam;
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.Contacts;
+import android.provider.ContactsContract;
+import android.telephony.PhoneNumberUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -78,9 +83,9 @@ public class ImportListAdapter extends BaseAdapter {
 		final CheckBox text = (CheckBox) res.findViewById(R.id.sender);
 		final TextView count = (TextView) res.findViewById(R.id.messageCount);
 
-		text.setText(status.address);
+		text.setText(status.name == null ? status.address : status.name);
 		text.setChecked(status.isSpam != null && status.isSpam);
-		if (status.isSpam == null) {
+		if (status.isSpam == null || status.personId != null) {
 			if (itemUpdater == null) {
 				itemUpdater = new Thread(new Runnable() {
 					@Override
@@ -102,14 +107,37 @@ public class ImportListAdapter extends BaseAdapter {
 							while (!itemsToUpdate.isEmpty()) {
 								final Item item;
 								item = (Item)itemsToUpdate.poll();
-								if (item != null && item.status.isSpam == null) {
-									item.status.isSpam = importer.checkSpam(item.status);
-									activity.runOnUiThread(new Runnable() {
-										@Override
-										public void run() {
-											item.view.setChecked(item.status.isSpam);
+								if (item != null) {
+									// Suggest spam status
+									if (item.status.isSpam == null) {
+										item.status.isSpam = importer.checkSpam(item.status);
+										activity.runOnUiThread(new Runnable() {
+											@Override
+											public void run() {
+												item.view.setChecked(item.status.isSpam);
+											}
+										});
+									}
+									// Substitute phone number with display name
+									if (item.status.name == null && item.status.personId != null &&
+											PhoneNumberUtils.isGlobalPhoneNumber(item.status.address))
+									{
+										Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(item.status.address));
+										Cursor cur = activity.getContentResolver().query(uri,
+												new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+										if (cur.moveToFirst()) {
+											item.status.name = cur.getString(0);
+											if (item.status.name != null && !item.status.name.trim().isEmpty()) {
+												activity.runOnUiThread(new Runnable() {
+													@Override
+													public void run() {
+														item.view.setText(item.status.name);
+													}
+												});
+											}
 										}
-									});
+										cur.close();
+									}
 								}
 							}
 						}
