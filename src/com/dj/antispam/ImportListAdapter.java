@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class ImportListAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int i) {
-		return getSenders().get(i).address.hashCode();
+		return i;
 	}
 
 	@Override
@@ -124,6 +125,12 @@ public class ImportListAdapter extends BaseAdapter {
 				terminate.notify();
 			}
 		}
+		text.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+				status.isSpam = b;
+			}
+		});
 		count.setText(Integer.toString(status.count));
 
 		return res;

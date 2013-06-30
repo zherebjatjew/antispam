@@ -41,7 +41,6 @@ public class ImportActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.importer);
 		final ListView senders = (ListView) findViewById(R.id.listView);
-		final List<SenderStatus> senderStates = getSenderStates();
 		adapter = new ImportListAdapter(this, importer);
 		senders.setAdapter(adapter);
 	}
@@ -71,17 +70,19 @@ public class ImportActivity extends Activity {
 				List<String> allowed = new ArrayList<String>();
 				for (int i = 0; i < adapter.getCount(); i++) {
 					SenderStatus status = (SenderStatus) adapter.getItem(i);
-					if (status.isSpam) {
-						denied.add(status.address);
-					} else {
-						allowed.add(status.address);
+					if (status.isSpam != null) {
+						if (status.isSpam) {
+							denied.add(status.address);
+						} else {
+							allowed.add(status.address);
+						}
 					}
 				}
-				dao.markSender(denied, true);
-				dao.markSender(allowed, false);
 				moveToSpam(dao, denied);
 				Intent intent = new Intent(getResources().getString(R.string.update_action));
 				sendBroadcast(intent);
+				dao.markSender(denied, true);
+				dao.markSender(allowed, false);
 				dao.close();
 			}
 		}).start();

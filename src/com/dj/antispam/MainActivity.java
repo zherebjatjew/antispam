@@ -94,6 +94,7 @@ public class MainActivity extends Activity {
 
 					case MotionEvent.ACTION_UP:
 						if (velocityTracker == null) break;
+						if (swipingView == null) break;
 						float deltaX = event.getRawX() - downX;
 						velocityTracker.addMovement(event);
 						velocityTracker.computeCurrentVelocity(1000);
@@ -218,7 +219,7 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "Update spam list intent has been received");
 				// Wait for record updated is complete or you'll get empty record
 				try {
-					Thread.sleep(50);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {}
 				stopManagingCursor(cursor);
 				cursor = dao.getSpamCursor();
