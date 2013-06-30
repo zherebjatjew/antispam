@@ -40,7 +40,7 @@ public class SmsDao {
 	}
 
 	public Cursor getSpamCursor() {
-		return db.rawQuery("SELECT * from `messages` ORDER BY `addedAt` DESC", null);
+		return db.rawQuery("SELECT * from `messages` ORDER BY `sentAt` DESC", null);
 	}
 
 
