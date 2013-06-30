@@ -101,17 +101,15 @@ public class MainActivity extends Activity {
 						float velocityY = Math.abs(velocityTracker.getYVelocity());
 						boolean dismiss = false;
 						boolean dismissRight = false;
-						if (Math.abs(deltaX) > list.getWidth() / 2) {
+						if (Math.abs(deltaX) > list.getWidth() / 2 &&
+								minFlingVelocity <= velocityX && velocityX <= maxFlingVelocity
+								&& velocityY < velocityX)
+						{
 							dismiss = true;
 							dismissRight = deltaX > 0;
-						} else if (minFlingVelocity <= velocityX && velocityX <= maxFlingVelocity
-								&& velocityY < velocityX) {
-							dismiss = true;
-							dismissRight = velocityTracker.getXVelocity() > 0;
 						}
 						if (dismiss) {
 							// dismiss
-							final int position = downPosition;
 							final boolean fDismissRight = dismissRight;
 /*
 							downView.animate()
