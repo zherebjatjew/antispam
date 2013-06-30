@@ -29,7 +29,6 @@ public class ImportActivity extends Activity {
 
 	private ImportListAdapter adapter;
 	private SmsDao dao;
-	private SmsImporter importer;
 
 	/**
 	 * Called when the activity is first created.
@@ -37,11 +36,10 @@ public class ImportActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		dao = new SmsDao(this);
-		importer = new SmsImporter(this, dao);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.importer);
 		final ListView senders = (ListView) findViewById(R.id.listView);
-		adapter = new ImportListAdapter(this, importer);
+		adapter = new ImportListAdapter(this, dao);
 		senders.setAdapter(adapter);
 	}
 
@@ -52,11 +50,6 @@ public class ImportActivity extends Activity {
 			dao.close();
 		}
 		adapter.close();
-	}
-
-	private List<SenderStatus> getSenderStates() {
-		final List<SenderStatus> res = importer.collect();
-		return res;
 	}
 
 	public void onOk(View view) {
