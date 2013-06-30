@@ -24,8 +24,6 @@
             android:id="@+id/messageCount"
             android:layout_gravity="center_horizontal|right|top"
             android:layout_alignParentLeft="false"
-            android:layout_marginLeft="99dp"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="0dp"
             android:layout_alignParentRight="true"/>
 </RelativeLayout>
