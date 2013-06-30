@@ -5,25 +5,10 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
 
-    <ListView
+    <LinearLayout
+            android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/listView"
-            android:layout_gravity="left|top"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="0dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="0dp"/>
-
-    <TableLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="0dp"
-            android:layout_alignParentTop="false"
-            android:layout_marginTop="277dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true">
+            android:layout_height="fill_parent">
 
         <TableRow
                 android:layout_width="fill_parent"
@@ -45,6 +30,18 @@
                     android:layout_weight="1"
                     android:onClick="onCancel"/>
         </TableRow>
-    </TableLayout>
+
+        <ListView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/listView"
+                android:layout_gravity="left|top"
+                android:layout_marginLeft="0dp"
+                android:layout_marginTop="0dp"
+                android:fastScrollEnabled="true"
+                android:smoothScrollbar="true"
+                android:scrollingCache="true"
+                android:choiceMode="multipleChoice"/>
+    </LinearLayout>
 
 </RelativeLayout>
