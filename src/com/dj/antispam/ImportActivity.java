@@ -92,16 +92,16 @@ public class ImportActivity extends Activity {
 			}
 		}) + ")";
 		Cursor cur = getContentResolver().query(Uri.parse(Utils.URI_INBOX),
-				new String[]{"address, body, date"}, where, null, null);
+				new String[]{"address, body, date, _id"}, where, null, null);
 		try {
 			if (cur.moveToFirst()) {
 				do {
 					dao.putMessage(cur.getString(0),
 							cur.getLong(2),
 							cur.getString(1));
+					getContentResolver().delete(Uri.parse(Utils.URI_SMS + "/" + cur.getLong(3)), null, null);
 				} while (cur.moveToNext());
 			}
-			getContentResolver().delete(Uri.parse(Utils.URI_SMS), where, null);
 		} finally {
 			cur.close();
 		}

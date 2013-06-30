@@ -221,6 +221,8 @@ public class ImportListAdapter extends BaseAdapter {
 								});
 							} else {
 								Log.w(TAG, "Invalid conversation thread id " + item.status.personId);
+								// Fails
+//								activity.getContentResolver().delete(Uri.parse("content:/sms/conversations/" + item.status.personId), null, null);
 							}
 						} finally {
 							if (mycursor != null) {
@@ -253,12 +255,12 @@ public class ImportListAdapter extends BaseAdapter {
 	}
 
 	private boolean checkSpam(SenderStatus status) {
-		if (!PhoneNumberUtils.isGlobalPhoneNumber(status.address)) {
-			return true;
-		}
 		Boolean seen = dao.isSenderASpammer(status.address);
 		if (seen != null) {
 			return seen;
+		}
+		if (!PhoneNumberUtils.isGlobalPhoneNumber(status.address)) {
+			return true;
 		}
 		if (status.read != null && !status.read && status.count == 1) {
 			return true;
