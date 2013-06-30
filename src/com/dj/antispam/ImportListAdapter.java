@@ -13,6 +13,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -30,6 +31,7 @@ public class ImportListAdapter extends BaseAdapter {
 	private final Activity activity;
 	private final SmsImporter importer;
 	private volatile Boolean terminate = false;
+	private Cursor conversations;
 
 	private class Item {
 		SenderStatus status;
@@ -45,9 +47,18 @@ public class ImportListAdapter extends BaseAdapter {
 
 	private List<SenderStatus> getSenders() {
 		if (senders == null) {
-			senders = importer.collect();
+			//senders = importer.collect();
+			senders = new ArrayList<SenderStatus>();
 		}
 		return senders;
+	}
+
+	private Cursor getConversations() {
+		if (conversations == null) {
+			conversations = activity.getContentResolver().query(Uri.parse("content://sms/conversations/"), null, null, null, "date DESC");
+			conversations.moveToFirst();
+		}
+		return conversations;
 	}
 
 	public void close() {
@@ -59,16 +70,34 @@ public class ImportListAdapter extends BaseAdapter {
 		} catch (InterruptedException e) {
 			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 		}
+		if (conversations != null) {
+			conversations.close();
+		}
 	}
 
 	@Override
 	public int getCount() {
-		return getSenders().size();
+		return getConversations().getCount();
 	}
 
 	@Override
-	public Object getItem(int i) {
-		return getSenders().get(i);
+	public SenderStatus getItem(int i) {
+		List<SenderStatus> s = getSenders();
+		if (s.size() <= i) {
+			for (int n = s.size(); n <= i; n++) {
+				s.add(null);
+			}
+		}
+		if (s.get(i) == null) {
+			Cursor convs = getConversations();
+			final int convPos = convs.getPosition();
+			if (convPos != -1 && (i == convPos || convs.move(i-convPos))) {
+				SenderStatus status = new SenderStatus(null, null, convs.getInt(convs.getColumnIndex("msg_count")));
+				status.personId = convs.getLong(convs.getColumnIndex("thread_id"));
+				s.set(i, status);
+			}
+		}
+		return s.get(i);
 	}
 
 	@Override
@@ -78,14 +107,16 @@ public class ImportListAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int i, View view, ViewGroup viewGroup) {
-		final SenderStatus status = getSenders().get(i);
+		final SenderStatus status = getItem(i);
 		final View res = activity.getLayoutInflater().inflate(R.layout.import_item, viewGroup, false);
 		final CheckBox text = (CheckBox) res.findViewById(R.id.sender);
 		final TextView count = (TextView) res.findViewById(R.id.messageCount);
 
-		text.setText(status.name == null ? status.address : status.name);
+		if (status.address != null) {
+			text.setText(status.name == null ? status.address : status.name);
+		}
 		text.setChecked(status.isSpam != null && status.isSpam);
-		if (status.isSpam == null || status.personId != null) {
+		if (status.isSpam == null || status.address == null || status.personId != null || status.name == null) {
 			if (itemUpdater == null) {
 				itemUpdater = new Thread(new Runnable() {
 					@Override
@@ -108,35 +139,75 @@ public class ImportListAdapter extends BaseAdapter {
 								final Item item;
 								item = (Item)itemsToUpdate.poll();
 								if (item != null) {
+									// Load sender address
+									if (item.status.address == null) {
+										Uri uri = Uri.parse("content://sms/inbox");
+										String where = "thread_id=" + item.status.personId;
+										Cursor mycursor = activity.getContentResolver().query(uri, null, where, null, null);
+										item.status.address = "???";
+										try {
+											if (mycursor.moveToFirst()) {
+												item.status.address = mycursor.getString(mycursor.getColumnIndex("address"));
+												activity.runOnUiThread(new Runnable() {
+													@Override
+													public void run() {
+														item.view.setText(item.status.address);
+														item.view.invalidate();
+														item.view.postInvalidate();
+														if (item.status.isSpam == null || item.status.name == null) {
+															itemsToUpdate.add(item);
+														}
+													}
+												});
+											}
+										} finally {
+											if (mycursor != null) {
+												mycursor.close();
+											}
+										}
+									}
 									// Suggest spam status
-									if (item.status.isSpam == null) {
+									else if (item.status.isSpam == null) {
 										item.status.isSpam = importer.checkSpam(item.status);
 										activity.runOnUiThread(new Runnable() {
 											@Override
 											public void run() {
 												item.view.setChecked(item.status.isSpam);
+												item.view.invalidate();
+												item.view.postInvalidate();
+												if (item.status.name == null) {
+													itemsToUpdate.add(item);
+												}
 											}
 										});
 									}
 									// Substitute phone number with display name
-									if (item.status.name == null && item.status.personId != null &&
-											PhoneNumberUtils.isGlobalPhoneNumber(item.status.address))
-									{
-										Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(item.status.address));
-										Cursor cur = activity.getContentResolver().query(uri,
-												new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
-										if (cur.moveToFirst()) {
-											item.status.name = cur.getString(0);
-											if (item.status.name != null && !item.status.name.trim().isEmpty()) {
-												activity.runOnUiThread(new Runnable() {
-													@Override
-													public void run() {
-														item.view.setText(item.status.name);
+									else if (item.status.name == null) {
+										item.status.name = item.status.address;
+										if (PhoneNumberUtils.isGlobalPhoneNumber(item.status.address)) {
+											Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(item.status.address));
+											Cursor cur = activity.getContentResolver().query(uri,
+													new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+											try {
+												if (cur.moveToFirst()) {
+													item.status.name = cur.getString(0);
+													if (item.status.name != null && !item.status.name.trim().isEmpty()) {
+														activity.runOnUiThread(new Runnable() {
+															@Override
+															public void run() {
+																item.view.setText(item.status.name);
+																item.view.invalidate();
+																item.view.postInvalidate();
+															}
+														});
 													}
-												});
+												}
+											} finally {
+												if (cur != null) {
+													cur.close();
+												}
 											}
 										}
-										cur.close();
 									}
 								}
 							}
