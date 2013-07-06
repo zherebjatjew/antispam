@@ -12,6 +12,7 @@ import java.util.List;
 public class Utils {
 	public static final String URI_SMS = "content://sms";
 	public static final String URI_INBOX = URI_SMS + "/inbox";
+	public static final String URI_THREADS = "content://sms/conversations/";
 	public static final String PREFERENCES = "preferences";
 	public static String join(List items, Processor processor) {
 		StringBuilder res = new StringBuilder();

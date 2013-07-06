@@ -133,9 +133,9 @@ public class ImportActivity extends ActionBarActivity {
 				} while (cur.moveToNext());
 			}
 			for (Long thread_id : threads.keySet()) {
-				resolver.delete(Uri.parse("content://sms/conversations/" + thread_id), null, null);
+				resolver.delete(Uri.parse(Utils.URI_THREADS + thread_id), null, null);
 			}
-			resolver.delete(Uri.parse("content://sms/conversations/-1"), null, null);
+			resolver.delete(Uri.parse(Utils.URI_THREADS + "-1"), null, null);
 		} finally {
 			cur.close();
 		}
