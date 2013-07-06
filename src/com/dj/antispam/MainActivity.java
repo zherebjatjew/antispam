@@ -14,12 +14,13 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import com.dj.antispam.actionbarcompat.ActionBarActivity;
 import com.dj.antispam.dao.SmsDao;
 
 import java.text.DateFormat;
 import java.util.Date;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private SmsDao dao;
 	private BroadcastReceiver updater;

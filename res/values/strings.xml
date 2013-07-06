@@ -7,7 +7,9 @@
     <string name="hint_cancel">Cancel</string>
     <string name="hint_ok">Ok</string>
     <string name="menu_import">Import</string>
-    <string name="menu_sel_all">Select all</string>
-    <string name="menu_sel_none">Unselect all</string>
-    <string name="menu_sel_auto">Auto</string>
+    <string name="menu_sel_all">all</string>
+    <string name="menu_sel_none">none</string>
+    <string name="menu_sel_auto">auto</string>
+    <string name="menu_sel">select</string>
+    <string name="import_name">mark spamers</string>
 </resources>

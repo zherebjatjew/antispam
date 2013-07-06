@@ -8,7 +8,7 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="wrap_content">
 
         <RelativeLayout
                 android:orientation="vertical"
@@ -19,28 +19,6 @@
                 android:background="#f0f0f0"
                 >
 
-            <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/okButton"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentTop="true"
-                    android:background="@drawable/navigation_accept"
-                    android:onClick="onOk"
-                    android:padding="8dp"
-                    android:contentDescription="@string/hint_ok"/>
-
-            <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/cancelButton"
-                    android:layout_alignParentLeft="false"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentRight="true"
-                    android:onClick="onCancel"
-                    android:background="@drawable/navigation_cancel"
-                    android:padding="8dp"
-                    android:contentDescription="@string/hint_cancel"/>
         </RelativeLayout>
 
         <ListView
@@ -54,6 +32,38 @@
                 android:smoothScrollbar="true"
                 android:scrollingCache="true"
                 android:choiceMode="multipleChoice"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+
+        <ImageButton
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/cancelButton"
+                android:layout_alignParentLeft="false"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:onClick="onCancel"
+                android:contentDescription="@string/hint_cancel"
+                android:layout_weight="1"
+                android:scaleType="center"
+                android:src="@drawable/navigation_cancel"/>
+
+        <ImageButton
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/okButton"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:onClick="onOk"
+                android:contentDescription="@string/hint_ok"
+                android:layout_weight="1"
+                android:scaleType="center"
+                android:src="@drawable/navigation_accept"/>
     </LinearLayout>
 
 </RelativeLayout>

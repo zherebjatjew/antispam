@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<item name="bottomMenu" type="id"/></resources>
+    <item name="bottomMenu" type="id"/>
+    <item type="id" name="actionbar_compat" />
+    <item type="id" name="actionbar_compat_title" />
+</resources>

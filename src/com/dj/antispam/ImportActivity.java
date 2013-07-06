@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import com.dj.antispam.actionbarcompat.ActionBarActivity;
 import com.dj.antispam.dao.SmsDao;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.Map;
  * Time: 13:18
  * To change this template use File | Settings | File Templates.
  */
-public class ImportActivity extends Activity {
+public class ImportActivity extends ActionBarActivity {
 
 	public static final int FIRST_IMPORT = 1;
 

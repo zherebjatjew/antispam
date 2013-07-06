@@ -2,9 +2,12 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_sel_all"
+          android:showAsAction="always"
           android:title="@string/menu_sel_all"/>
     <item android:id="@+id/menu_sel_none"
+          android:showAsAction="always"
           android:title="@string/menu_sel_none"/>
     <item android:id="@+id/menu_sel_auto"
+          android:showAsAction="always"
           android:title="@string/menu_sel_auto"/>
 </menu>
