@@ -7,10 +7,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.VelocityTracker;
-import android.view.View;
-import android.view.ViewConfiguration;
+import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.CursorAdapter;
@@ -28,6 +25,22 @@ public class MainActivity extends Activity {
 	private BroadcastReceiver updater;
 	private Cursor cursor;
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_import:
+				openImportActivity();
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Called when the activity is first created.
@@ -236,8 +249,12 @@ public class MainActivity extends Activity {
 			editor.putInt("antispamImport", 1);
 			editor.commit();
 */
-			startActivityForResult(new Intent(this, ImportActivity.class), ImportActivity.FIRST_IMPORT);
+			openImportActivity();
 		}
+	}
+
+	private void openImportActivity() {
+		startActivityForResult(new Intent(this, ImportActivity.class), ImportActivity.FIRST_IMPORT);
 	}
 
 	@Override

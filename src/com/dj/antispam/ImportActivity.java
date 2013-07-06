@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -41,6 +44,29 @@ public class ImportActivity extends Activity {
 		final ListView senders = (ListView) findViewById(R.id.listView);
 		adapter = new ImportListAdapter(this, dao);
 		senders.setAdapter(adapter);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.import_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_sel_all:
+				onSelectAll();
+				return true;
+			case R.id.menu_sel_none:
+				onSelectNone();
+				return true;
+			case R.id.menu_sel_auto:
+				onSelectAuto();
+				return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -111,4 +137,10 @@ public class ImportActivity extends Activity {
 		setResult(RESULT_CANCELED);
 		finish();
 	}
+
+	private void onSelectAll() {}
+
+	private void onSelectNone() {}
+
+	private void onSelectAuto() {}
 }

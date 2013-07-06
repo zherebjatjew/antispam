@@ -6,4 +6,8 @@
     <string name="update_action">com.dj.antispam.SPAM_LIST_CHANGED</string><string name="ok">OK</string><string name="cancel">Cancel</string>
     <string name="hint_cancel">Cancel</string>
     <string name="hint_ok">Ok</string>
+    <string name="menu_import">Import</string>
+    <string name="menu_sel_all">Select all</string>
+    <string name="menu_sel_none">Unselect all</string>
+    <string name="menu_sel_auto">Auto</string>
 </resources>
