@@ -1,6 +1,7 @@
 package com.dj.antispam;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -90,7 +91,7 @@ public class ImportActivity extends ActionBarActivity {
 				List<String> allowed = new ArrayList<String>();
 				for (int i = 0; i < adapter.getCount(); i++) {
 					SenderStatus status = (SenderStatus) adapter.getItem(i);
-					if (status.isSpam != null) {
+					if (status.isSpam != null && status.address != null) {
 						if (status.isSpam) {
 							denied.add(status.address);
 						} else {
@@ -118,17 +119,23 @@ public class ImportActivity extends ActionBarActivity {
 				builder.append(DatabaseUtils.sqlEscapeString((String) item));
 			}
 		}) + ")";
-		Cursor cur = getContentResolver().query(Uri.parse(Utils.URI_INBOX),
-				new String[]{"address, body, date, _id"}, where, null, null);
+		ContentResolver resolver = getContentResolver();
+		Cursor cur = resolver.query(Uri.parse(Utils.URI_INBOX),
+				new String[]{"address, body, date, _id, thread_id"}, where, null, null);
+		Map<Long,Long> threads = new HashMap<Long, Long>();
 		try {
 			if (cur.moveToFirst()) {
 				do {
 					dao.putMessage(cur.getString(0),
 							cur.getLong(2),
 							cur.getString(1));
-					getContentResolver().delete(Uri.parse(Utils.URI_SMS + "/" + cur.getLong(3)), null, null);
+					threads.put(cur.getLong(4), 1L);
 				} while (cur.moveToNext());
 			}
+			for (Long thread_id : threads.keySet()) {
+				resolver.delete(Uri.parse("content://sms/conversations/" + thread_id), null, null);
+			}
+			resolver.delete(Uri.parse("content://sms/conversations/-1"), null, null);
 		} finally {
 			cur.close();
 		}

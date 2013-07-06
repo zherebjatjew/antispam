@@ -289,6 +289,7 @@ public class MainActivity extends ActionBarActivity {
 		values.put("read", true);
 		values.put("date", message.sentAt);
 		getContentResolver().insert(Uri.parse(Utils.URI_INBOX), values);
+		getContentResolver().delete(Uri.parse("content://sms/conversations/-1"), null, null);
 		dao.deleteMessage(messageId);
 	}
 
