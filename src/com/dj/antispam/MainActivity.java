@@ -245,10 +245,8 @@ public class MainActivity extends Activity {
 		int value = prefs.getInt("antispamImport", 0);
 		if (value == 0) {
 			SharedPreferences.Editor editor = prefs.edit();
-/*
 			editor.putInt("antispamImport", 1);
 			editor.commit();
-*/
 			openImportActivity();
 		}
 	}
