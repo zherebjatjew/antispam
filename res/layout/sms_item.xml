@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:text="Message body here."
             android:id="@+id/body"
-            android:layout_gravity="left|center_vertical"/>
+            android:layout_gravity="left|center_vertical"
+            android:singleLine="false"/>
 
 </LinearLayout>

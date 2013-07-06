@@ -33,6 +33,7 @@ public class ImportListAdapter extends BaseAdapter {
 	private List<SenderStatus> senders;
 	private final Activity activity;
 	private volatile Boolean terminate = false;
+	private Boolean initialCheck = null;
 	private Cursor conversations;
 	private SmsDao dao;
 
@@ -74,7 +75,23 @@ public class ImportListAdapter extends BaseAdapter {
 		}
 		if (conversations != null) {
 			conversations.close();
+			conversations = null;
 		}
+	}
+
+	public void reset(Boolean mode) {
+		initialCheck = mode;
+		if (senders != null) {
+			for (SenderStatus sender : senders) {
+				sender.isSpam = null;
+			}
+		}
+		activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				notifyDataSetChanged();
+			}
+		});
 	}
 
 	@Override
@@ -255,16 +272,20 @@ public class ImportListAdapter extends BaseAdapter {
 	}
 
 	private boolean checkSpam(SenderStatus status) {
-		Boolean seen = dao.isSenderASpammer(status.address);
-		if (seen != null) {
-			return seen;
+		if (initialCheck == null) {
+			Boolean seen = dao.isSenderASpammer(status.address);
+			if (seen != null) {
+				return seen;
+			}
+			if (!PhoneNumberUtils.isGlobalPhoneNumber(status.address)) {
+				return true;
+			}
+			if (status.read != null && !status.read && status.count == 1) {
+				return true;
+			}
+			return false;
+		} else {
+			return initialCheck;
 		}
-		if (!PhoneNumberUtils.isGlobalPhoneNumber(status.address)) {
-			return true;
-		}
-		if (status.read != null && !status.read && status.count == 1) {
-			return true;
-		}
-		return false;
 	}
 }

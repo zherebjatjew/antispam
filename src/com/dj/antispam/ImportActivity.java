@@ -146,9 +146,15 @@ public class ImportActivity extends ActionBarActivity {
 		finish();
 	}
 
-	private void onSelectAll() {}
+	private void onSelectAll() {
+		adapter.reset(Boolean.TRUE);
+	}
 
-	private void onSelectNone() {}
+	private void onSelectNone() {
+		adapter.reset(Boolean.FALSE);
+	}
 
-	private void onSelectAuto() {}
+	private void onSelectAuto() {
+		adapter.reset(null);
+	}
 }

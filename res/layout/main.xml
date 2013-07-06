@@ -8,7 +8,7 @@
     <RelativeLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="left|center_vertical"
             android:id="@+id/header"
             android:background="#f0f0f0"
@@ -26,7 +26,10 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="false"
                 android:layout_alignWithParentIfMissing="false"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingLeft="8dp"/>
 
         <TextView
                 android:layout_width="wrap_content"
@@ -38,7 +41,10 @@
                 android:layout_alignParentTop="false"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
-                android:singleLine="false"/>
+                android:singleLine="false"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingRight="8dp"/>
     </RelativeLayout>
 
     <ListView
@@ -51,6 +57,6 @@
             android:scrollingCache="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            />
+            android:layout_above="@+id/header"/>
 </RelativeLayout>
 
