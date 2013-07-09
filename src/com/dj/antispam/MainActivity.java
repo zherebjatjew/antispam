@@ -145,16 +145,21 @@ public class MainActivity extends ActionBarActivity {
 							ta.setAnimationListener(new Animation.AnimationListener() {
 								@Override
 								public void onAnimationStart(Animation animation) {
+									new Thread(new Runnable() {
+										@Override
+										public void run() {
+											if (fDismissRight) {
+												onDeleteMessage(downPosition);
+											} else {
+												onRestoreMessage(downPosition);
+											}
+											updater.onReceive(getApplicationContext(), new Intent(getResources().getString(R.string.update_action)));
+										}
+									}).start();
 								}
 
 								@Override
 								public void onAnimationEnd(Animation animation) {
-									if (fDismissRight) {
-										onDeleteMessage(downPosition);
-									} else {
-										onRestoreMessage(downPosition);
-									}
-									updater.onReceive(getApplicationContext(), new Intent(getResources().getString(R.string.update_action)));
 								}
 
 								@Override
@@ -235,6 +240,7 @@ public class MainActivity extends ActionBarActivity {
 				cursor = dao.getSpamCursor();
 				startManagingCursor(cursor);
 				adapter.changeCursor(cursor);
+				list.postInvalidate();
 			}
 		};
 
