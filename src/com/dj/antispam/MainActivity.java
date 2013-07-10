@@ -1,6 +1,5 @@
 package com.dj.antispam;
 
-import android.app.Activity;
 import android.content.*;
 import android.database.Cursor;
 import android.graphics.Rect;
@@ -12,9 +11,9 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import com.dj.antispam.actionbarcompat.ActionBarActivity;
+import com.dj.antispam.dao.DbHelper;
 import com.dj.antispam.dao.SmsDao;
 
 import java.text.DateFormat;
@@ -23,8 +22,10 @@ import java.util.Date;
 public class MainActivity extends ActionBarActivity {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private SmsDao dao;
+	private Preferences prefs;
 	private BroadcastReceiver updater;
 	private Cursor cursor;
+	private long lastViewed;
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -49,24 +50,40 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		dao = new SmsDao(this);
+		prefs = new Preferences(this);
+		lastViewed = prefs.getLastViewedTime();
+
 		setContentView(R.layout.main);
 		final ListView list = (ListView)findViewById(R.id.listView);
 		cursor = dao.getSpamCursor();
 		startManagingCursor(cursor);
-		final CursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.sms_item, cursor,
-				new String[] {"from", "body", "sentAt"},
-				new int[] {R.id.from, R.id.body, R.id.date})
-		{
+		final CursorAdapter adapter = new CursorAdapter(getApplicationContext(), cursor, true) {
+
 			@Override
-			public void setViewText(TextView v, String text) {
-				super.setViewText(v, convText(v, text));
+			public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+				return getLayoutInflater().inflate(R.layout.sms_item, null, false);
 			}
-			private String convText(TextView v, String text) {
-				if (v.getId() == R.id.date) {
-					return DateFormat.getDateTimeInstance().format(new Date(Long.parseLong(text)));
+
+			@Override
+			public void bindView(View view, Context context, Cursor cursor) {
+				TextView from = (TextView) view.findViewById(R.id.from);
+				int colFrom = cursor.getColumnIndex(DbHelper.MESSAGES_FROM);
+				String strFrom = cursor.getString(colFrom);
+				from.setText(strFrom);
+				TextView body = (TextView) view.findViewById(R.id.body);
+				body.setText(cursor.getString(cursor.getColumnIndex(DbHelper.MESSAGES_BODY)));
+				((TextView)view.findViewById(R.id.date)).setText(formatTime(cursor.getLong(cursor.getColumnIndex(DbHelper.MESSAGES_DATETIME))));
+				if (cursor.getLong(cursor.getColumnIndex(DbHelper.MESSAGES_DATETIME)) < lastViewed) {
+					body.setTextColor(getResources().getColor(R.color.read_body));
+				} else {
+					body.setTextColor(getResources().getColor(R.color.unread_body));
 				}
-				return text;
+			}
+
+			private String formatTime(Long time) {
+				return DateFormat.getDateTimeInstance().format(new Date(time));
 			}
 		};
 		list.setAdapter(adapter);
@@ -78,7 +95,7 @@ public class MainActivity extends ActionBarActivity {
 			private final int minFlingVelocity;
 			private final int maxFlingVelocity;
 			private final int animationTime;
-			private boolean swiping = false;
+			private boolean swiping;
 
 			private View swipingView = null;
 
@@ -242,13 +259,9 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	private void importFromExistingMessages() {
-		SharedPreferences prefs = getSharedPreferences("antispamImport", Context.MODE_PRIVATE);
-		int value = prefs.getInt("antispamImport", 0);
-		if (value == 0) {
-			SharedPreferences.Editor editor = prefs.edit();
-			editor.putInt("antispamImport", 1);
-			editor.commit();
+		if (prefs.showImportActivity()) {
 			openImportActivity();
+			prefs.setShowImportActivity(false);
 		}
 	}
 
@@ -266,6 +279,7 @@ public class MainActivity extends ActionBarActivity {
 	protected void onPause() {
 		super.onPause();
 		unregisterReceiver(updater);
+		prefs.updateLastViewedTime();
 	}
 
 	@Override
@@ -284,11 +298,11 @@ public class MainActivity extends ActionBarActivity {
 	private void restoreMessage(int messageId) {
 		SmsModel message = dao.getMessage(messageId);
 		ContentValues values = new ContentValues();
-		values.put("address", message.from);
-		values.put("body", message.body);
-		values.put("read", true);
-		values.put("type", 1);
-		values.put("date", message.sentAt);
+		values.put(Utils.MESSAGE_ADDRESS, message.from);
+		values.put(Utils.MESSAGE_BODY, message.body);
+		values.put(Utils.MESSAGE_READ, true);
+		values.put(Utils.MESSAGE_TYPE, Utils.MESSAGE_TYPE_SMS);
+		values.put(Utils.MESSAGE_DATE, message.sentAt);
 		getContentResolver().insert(Uri.parse(Utils.URI_INBOX), values);
 		getContentResolver().delete(Uri.parse(Utils.URI_THREADS + "-1"), null, null);
 		dao.deleteMessage(messageId);

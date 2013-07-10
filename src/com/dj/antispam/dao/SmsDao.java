@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import com.dj.antispam.SmsModel;
 import com.dj.antispam.Utils;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -24,9 +23,9 @@ public class SmsDao {
 
 	public long putMessage(String from, long datetime, String body) {
 		ContentValues values = new ContentValues();
-		values.put(DbHelper.MESSAGES_FROM, from);
+		values.put('`' + DbHelper.MESSAGES_FROM + '`', from);
 		values.put(DbHelper.MESSAGES_DATETIME, datetime);
-		values.put(DbHelper.MESSAGES_BODY, body);
+		values.put('`' + DbHelper.MESSAGES_BODY + '`', body);
 		return db.insert(DbHelper.TABLE_MESSAGES, null, values);
 	}
 

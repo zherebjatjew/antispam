@@ -13,7 +13,13 @@ public class Utils {
 	public static final String URI_SMS = "content://sms";
 	public static final String URI_INBOX = URI_SMS + "/inbox";
 	public static final String URI_THREADS = "content://sms/conversations/";
-	public static final String PREFERENCES = "preferences";
+	public static final int    MESSAGE_TYPE_SMS = 1;
+	public static final String MESSAGE_ADDRESS = "address";
+	public static final String MESSAGE_BODY = "body";
+	public static final String MESSAGE_READ = "read";
+	public static final String MESSAGE_TYPE = "type";
+	public static final String MESSAGE_DATE = "date";
+
 	public static String join(List items, Processor processor) {
 		StringBuilder res = new StringBuilder();
 		for (int i = 0; i < items.size(); i++) {
