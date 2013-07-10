@@ -27,8 +27,17 @@ public class SmsFilter {
 		this.context = context;
 	}
 
-	public boolean isUnwelcome(String from) {
+	public Boolean isUnwelcome(String from) {
 		Log.i(TAG, "Message from " + from);
+		// TODO: Remove next line after debug
+		if ("+000".equals(from)) {
+			Log.i(TAG, "SPAM: Predefined black list");
+			return true;
+		}
+		if ("+001".equals(from)) {
+			Log.i(TAG, "UNKNOWN status");
+			return null;
+		}
 		if (isFromBlackList(from)) {
 			Log.i(TAG, "SPAM: sender is in black list");
 			return true;
@@ -41,11 +50,6 @@ public class SmsFilter {
 			Log.i(TAG, "NOT SPAM: User has written to the sender");
 			return false;
 		}
-		// TODO: Remove next line after debug
-		if ("+000".equals(from)) {
-			Log.i(TAG, "SPAM: Predefined black list");
-			return true;
-		}
 		if (isFromWhiteList(from)) {
 			Log.i(TAG, "NOT SPAM: in white list");
 			return false;
@@ -55,7 +59,7 @@ public class SmsFilter {
 			return true;
 		}
 		Log.i(TAG, "UNKNOWN status");
-		return false;
+		return null;
 	}
 
 	private boolean hasEverMessagedTo(String from) {

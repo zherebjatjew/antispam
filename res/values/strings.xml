@@ -3,7 +3,9 @@
     <string name="app_name">antispam</string>
     <string name="swype_left_hint"><![CDATA[<< to inbox]]></string>
     <string name="swype_right_hint"><![CDATA[to trash >>]]></string>
-    <string name="update_action">com.dj.antispam.SPAM_LIST_CHANGED</string><string name="ok">OK</string><string name="cancel">Cancel</string>
+    <string name="update_action">com.dj.antispam.SPAM_LIST_CHANGED</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="hint_cancel">Cancel</string>
     <string name="hint_ok">Ok</string>
     <string name="menu_import">Import</string>
@@ -12,4 +14,6 @@
     <string name="menu_sel_auto">auto</string>
     <string name="menu_sel">select</string>
     <string name="import_name">mark spamers</string>
+    <string name="note_title" formatted="false">Potential spam: %s</string>
+    <string name="note_text" formatted="false">Message text: %s</string>
 </resources>
