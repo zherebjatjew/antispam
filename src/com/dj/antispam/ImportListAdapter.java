@@ -3,7 +3,6 @@ package com.dj.antispam;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.Contacts;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
@@ -18,7 +17,7 @@ import com.dj.antispam.dao.SmsDao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -221,7 +220,7 @@ public class ImportListAdapter extends BaseAdapter {
 						item.status.address = "???";
 						try {
 							if (mycursor.moveToFirst()) {
-								item.status.address = mycursor.getString(mycursor.getColumnIndex("address"));
+								item.status.address = mycursor.getString(mycursor.getColumnIndex(Utils.MESSAGE_ADDRESS));
 								activity.runOnUiThread(new Runnable() {
 									@Override
 									public void run() {

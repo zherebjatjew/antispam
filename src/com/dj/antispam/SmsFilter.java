@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.SmsMessage;
 import android.util.Log;
 import com.dj.antispam.dao.SmsDao;
 
@@ -63,7 +62,7 @@ public class SmsFilter {
 	}
 
 	private boolean hasEverMessagedTo(String from) {
-		Cursor cur = context.getContentResolver().query(Uri.parse(Utils.URI_SMS), new String[]{"address"}, "address=?", new String[]{from}, null);
+		Cursor cur = context.getContentResolver().query(Uri.parse(Utils.URI_SMS), new String[]{Utils.MESSAGE_ADDRESS}, Utils.MESSAGE_ADDRESS + "=?", new String[]{from}, null);
 		try {
 			return !cur.isAfterLast();
 		} finally {

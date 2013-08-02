@@ -17,9 +17,9 @@ import java.util.UUID;
 public class DbHelper extends SQLiteOpenHelper {
 	public static final String TABLE_MESSAGES = "messages";
 	public static final String MESSAGES_ID = "_id";
-	public static final String MESSAGES_FROM = "`from`";
+	public static final String MESSAGES_FROM = "from";
 	public static final String MESSAGES_DATETIME = "sentAt";
-	public static final String MESSAGES_BODY = "`body`";
+	public static final String MESSAGES_BODY = "body";
 
 	private static final String DB_NAME = "db";
 	private static final int DB_VERSION = 1;
