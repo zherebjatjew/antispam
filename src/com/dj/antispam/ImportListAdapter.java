@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -28,7 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class ImportListAdapter extends BaseAdapter {
 
-	private static final String TAG = "ImportListAdapter";
 	private List<SenderStatus> senders;
 	private final Activity activity;
 	private volatile Boolean terminate = false;
@@ -235,10 +233,6 @@ public class ImportListAdapter extends BaseAdapter {
 										}
 									}
 								});
-							} else {
-								Log.w(TAG, "Invalid conversation thread id " + item.status.personId);
-								// Fails
-//								activity.getContentResolver().delete(Uri.parse("content:/sms/conversations/" + item.status.personId), null, null);
 							}
 						} finally {
 							if (mycursor != null) {

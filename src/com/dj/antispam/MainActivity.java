@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -251,7 +250,6 @@ public class MainActivity extends ActionBarActivity {
 		updater = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				Log.d(TAG, "Update spam list intent has been received");
 				// Wait for record updated is complete or you'll get empty record
 				stopManagingCursor(cursor);
 				cursor = dao.getSpamCursor();
@@ -298,7 +296,6 @@ public class MainActivity extends ActionBarActivity {
 
 	@Override
 	protected void onActivityResult(int code, int result, Intent intent) {
-		Log.d(TAG, "Activity has closed");
 	}
 
 	private void restoreMessage(int messageId) {

@@ -27,16 +27,6 @@ public class SmsFilter {
 	}
 
 	public Boolean isUnwelcome(String from) {
-		Log.i(TAG, "Message from " + from);
-		// TODO: Remove next line after debug
-		if ("+000".equals(from)) {
-			Log.i(TAG, "SPAM: Predefined black list");
-			return true;
-		}
-		if ("+001".equals(from)) {
-			Log.i(TAG, "UNKNOWN status");
-			return null;
-		}
 		if (isFromBlackList(from)) {
 			Log.i(TAG, "SPAM: sender is in black list");
 			return true;
