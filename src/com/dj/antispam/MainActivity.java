@@ -232,12 +232,8 @@ public class MainActivity extends ActionBarActivity {
 
 			private int getMessageId(int nItem) {
 				Cursor cur = (Cursor)list.getAdapter().getItem(nItem);
-				try {
-					int col = cur.getColumnIndex("_id");
-					return cur.getInt(col);
-				} finally {
-					cur.close();
-				}
+				int col = cur.getColumnIndex("_id");
+				return cur.getInt(col);
 			}
 
 			private void onDeleteMessage(int nItem) {
