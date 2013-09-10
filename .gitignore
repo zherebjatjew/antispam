@@ -2,7 +2,8 @@
 .idea
 gen
 out
-
+antispam.apk
+proguard_logs
 # Package Files #
 *.jar
 *.war
