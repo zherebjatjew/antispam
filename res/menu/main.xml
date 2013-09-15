@@ -4,4 +4,7 @@
     <item android:id="@+id/menu_import"
           android:showAsAction="always"
           android:title="@string/menu_import"/>
+    <item android:id="@+id/menu_revert"
+          android:showAsAction="always"
+          android:title="@string/menu_revert"/>
 </menu>

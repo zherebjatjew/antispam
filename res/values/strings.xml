@@ -16,4 +16,7 @@
     <string name="import_name">mark spamers</string>
     <string name="note_title" formatted="false">Potential spam: %s</string>
     <string name="note_text" formatted="false">Message text: %s</string>
+    <string name="menu_revert">revert</string>
+    <string name="msg_revert_error">Error restoring messages</string>
+    <string name="msg_revert_ok">All messages were returned to the inbox</string><string name="remove_item_text">processing...</string>
 </resources>

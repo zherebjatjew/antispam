@@ -12,12 +12,16 @@ import android.view.animation.TranslateAnimation;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.dj.antispam.actionbarcompat.ActionBarActivity;
 import com.dj.antispam.dao.DbHelper;
 import com.dj.antispam.dao.SmsDao;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 	private static final String TAG = MainActivity.class.getSimpleName();
@@ -25,7 +29,6 @@ public class MainActivity extends ActionBarActivity {
 	private Preferences prefs;
 	private BroadcastReceiver updater;
 	private Cursor cursor;
-	private long lastViewed;
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -40,6 +43,9 @@ public class MainActivity extends ActionBarActivity {
 			case R.id.menu_import:
 				openImportActivity();
 				return true;
+			case R.id.menu_revert:
+				restoreAllMessages();
+				return true;
 		}
 		return false;
 	}
@@ -53,163 +59,104 @@ public class MainActivity extends ActionBarActivity {
 
 		dao = new SmsDao(this);
 		prefs = new Preferences(this);
-		lastViewed = prefs.getLastViewedTime();
 
 		setContentView(R.layout.main);
 		final ListView list = (ListView)findViewById(R.id.listView);
 		cursor = dao.getSpamCursor();
 		startManagingCursor(cursor);
-		final CursorAdapter adapter = new CursorAdapter(getApplicationContext(), cursor, true) {
+		final SpamListAdapter adapter = new SpamListAdapter(this, cursor, prefs.getLastViewedTime()) {
 
-			@Override
-			public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-				return getLayoutInflater().inflate(R.layout.sms_item, null, false);
-			}
-
-			@Override
-			public void bindView(View view, Context context, Cursor cursor) {
-				TextView from = (TextView) view.findViewById(R.id.from);
-				int colFrom = cursor.getColumnIndex(DbHelper.MESSAGES_FROM);
-				String strFrom = cursor.getString(colFrom);
-				from.setText(strFrom);
-				TextView body = (TextView) view.findViewById(R.id.body);
-				body.setText(cursor.getString(cursor.getColumnIndex(DbHelper.MESSAGES_BODY)));
-				((TextView)view.findViewById(R.id.date)).setText(formatTime(cursor.getLong(cursor.getColumnIndex(DbHelper.MESSAGES_DATETIME))));
-				if (cursor.getLong(cursor.getColumnIndex(DbHelper.MESSAGES_DATETIME)) < lastViewed) {
-					body.setTextColor(getResources().getColor(R.color.read_body));
-				} else {
-					body.setTextColor(getResources().getColor(R.color.unread_body));
-				}
-			}
-
-			private String formatTime(Long time) {
-				return DateFormat.getDateTimeInstance().format(new Date(time));
-			}
 		};
 		list.setAdapter(adapter);
-		list.setOnTouchListener(new View.OnTouchListener() {
-			private float downX;
-			private int downPosition;
-			private VelocityTracker velocityTracker;
-			private final int slop;
-			private final int minFlingVelocity;
-			private final int maxFlingVelocity;
-			private final int animationTime;
-			private boolean swiping;
+		list.setOnTouchListener(new SwipeTouchListener() {
 
-			private View swipingView = null;
+			@Override
+			protected void onSwipeLeft(float x, float y) {
+				final View v = hitTest((int) x, (int) y);
+				Display display = getWindowManager().getDefaultDisplay();
+				v.clearAnimation();
+				TranslateAnimation translateAnim = new TranslateAnimation(0, -display.getWidth(), 0, 0);
+				translateAnim.setDuration(250);
+				translateAnim.setAnimationListener(new Animation.AnimationListener() {
 
-			{
-				ViewConfiguration vc = ViewConfiguration.get(list.getContext());
-				slop = vc.getScaledTouchSlop();
-				minFlingVelocity = vc.getScaledMinimumFlingVelocity();
-				maxFlingVelocity = vc.getScaledMaximumFlingVelocity();
-				animationTime = list.getContext().getResources().getInteger(android.R.integer.config_shortAnimTime);
+					@Override
+					public void onAnimationStart(Animation animation) {
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								int id = getMessageId(list.getPositionForView(v));
+								adapter.startRemovingMessage(id);
+								restoreMessage(id);
+								adapter.endRemovingMessage(id);
+								Intent intent = new Intent(getResources().getString(R.string.update_action));
+								sendBroadcast(intent);
+							}
+						}).start();
+					}
+
+					@Override
+					public void onAnimationRepeat(Animation animation) {
+					}
+
+					@Override
+					public void onAnimationEnd(Animation animation) {
+						int id = getMessageId(list.getPositionForView(v));
+						if (adapter.isRemoving(id)) {
+							invalidateViewItem(v);
+						}
+					}
+				});
+				v.startAnimation(translateAnim);
 			}
 
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						int[] coords = new int[2];
-						list.getLocationOnScreen(coords);
-						swipingView = hitTest((int) (event.getRawX() - coords[0]), (int) (event.getRawY() - coords[1]));
-						if (swipingView != null) {
-							downX = event.getRawX();
-							downPosition = list.getPositionForView(swipingView);
-							velocityTracker = VelocityTracker.obtain();
-							velocityTracker.addMovement(event);
+			protected void onSwipeRight(float x, float y) {
+				final View v = hitTest((int) x, (int) y);
+				Display display = getWindowManager().getDefaultDisplay();
+				v.clearAnimation();
+				TranslateAnimation translateAnim = new TranslateAnimation(0, display.getWidth(), 0, 0);
+				translateAnim.setDuration(250);
+				translateAnim.setAnimationListener(new Animation.AnimationListener() {
+
+					@Override
+					public void onAnimationStart(Animation animation) {
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								int id = getMessageId(list.getPositionForView(v));
+								adapter.startRemovingMessage(id);
+								deleteMessage(id);
+								adapter.endRemovingMessage(id);
+								Intent intent = new Intent(getResources().getString(R.string.update_action));
+								sendBroadcast(intent);
+							}
+						}).start();
+					}
+
+					@Override
+					public void onAnimationRepeat(Animation animation) {
+					}
+
+					@Override
+					public void onAnimationEnd(Animation animation) {
+						int id = getMessageId(list.getPositionForView(v));
+						if (adapter.isRemoving(id)) {
+							invalidateViewItem(v);
 						}
-						break;
+					}
+				});
+				v.startAnimation(translateAnim);
+			}
 
-					case MotionEvent.ACTION_UP:
-						if (velocityTracker == null) break;
-						if (swipingView == null) break;
-						float deltaX = event.getRawX() - downX;
-						velocityTracker.addMovement(event);
-						velocityTracker.computeCurrentVelocity(1000);
-						float velocityX = Math.abs(velocityTracker.getXVelocity());
-						float velocityY = Math.abs(velocityTracker.getYVelocity());
-						boolean dismiss = false;
-						boolean dismissRight = false;
-						if (Math.abs(deltaX) > list.getWidth() / 2 &&
-								minFlingVelocity <= velocityX && velocityX <= maxFlingVelocity
-								&& velocityY < velocityX)
-						{
-							dismiss = true;
-							dismissRight = deltaX > 0;
-						}
-						if (dismiss) {
-							// dismiss
-							final boolean fDismissRight = dismissRight;
-/*
-							downView.animate()
-									.translationX(dismissRight ? mViewWidth : -mViewWidth)
-									.alpha(0)
-									.setDuration(mAnimationTime)
-									.setListener(new AnimatorListenerAdapter() {
-										@Override
-										public void onAnimationEnd(Animator animation) {
-											performDismiss(downView, downPosition);
-										}
-									});
-*/
-							TranslateAnimation ta = new TranslateAnimation(swipingView.getLeft(),
-									fDismissRight ? swipingView.getLeft() + swipingView.getWidth() :
-									swipingView.getLeft() - swipingView.getWidth(), 0, 0);
-							ta.setDuration(animationTime);
-							ta.setFillAfter(true);
-							ta.setAnimationListener(new Animation.AnimationListener() {
-								@Override
-								public void onAnimationStart(Animation animation) {
-									new Thread(new Runnable() {
-										@Override
-										public void run() {
-											if (fDismissRight) {
-												onDeleteMessage(downPosition);
-											} else {
-												onRestoreMessage(downPosition);
-											}
-											updater.onReceive(getApplicationContext(), new Intent(getResources().getString(R.string.update_action)));
-										}
-									}).start();
-								}
-
-								@Override
-								public void onAnimationEnd(Animation animation) {
-								}
-
-								@Override
-								public void onAnimationRepeat(Animation animation) {
-								}
-							});
-							swipingView.startAnimation(ta);
-						}
-						break;
-
-					case MotionEvent.ACTION_MOVE:
-						if (velocityTracker == null) {
-							break;
-						}
-
-						velocityTracker.addMovement(event);
-						float dX = event.getRawX() - downX;
-						if (Math.abs(dX) > slop) {
-							swiping = true;
-							list.requestDisallowInterceptTouchEvent(true);
-
-							// Cancel ListView's touch (un-highlighting the item)
-							MotionEvent cancelEvent = MotionEvent.obtain(event);
-							cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
-							list.onTouchEvent(cancelEvent);
-						}
-
-						break;
-
-					default:
-						return false;
-				}
-				return false;
+			void invalidateViewItem(View view) {
+				// TODO: Use similar adapter's method instead
+				ViewGroup group = (ViewGroup) view;
+				int height = view.getMeasuredHeight();
+				View newView = getLayoutInflater().inflate(R.layout.removed_item, group, false);
+				newView.setMinimumHeight(height);
+				group.removeAllViews();
+				group.addView(newView);
+				view.invalidate();
 			}
 
 			private View hitTest(int x, int y) {
@@ -225,19 +172,13 @@ public class MainActivity extends ActionBarActivity {
 				return null;
 			}
 
-			private void onRestoreMessage(int nItem) {
-				int id = getMessageId(nItem);
-				restoreMessage(id);
-			}
-
 			private int getMessageId(int nItem) {
-				Cursor cur = (Cursor)list.getAdapter().getItem(nItem);
+				Cursor cur = (Cursor) list.getAdapter().getItem(nItem);
 				int col = cur.getColumnIndex("_id");
 				return cur.getInt(col);
 			}
 
-			private void onDeleteMessage(int nItem) {
-				int id = getMessageId(nItem);
+			private void deleteMessage(int id) {
 				SmsModel message = dao.getMessage(id);
 				dao.deleteMessage(id);
 				dao.markSender(message.from, true);
@@ -295,6 +236,36 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onActivityResult(int code, int result, Intent intent) {
 		Log.d(TAG, "Activity has closed");
+	}
+
+	private void restoreAllMessages() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Cursor cursor = dao.getSpamCursor();
+				try {
+					cursor.moveToFirst();
+					while (!cursor.isAfterLast()) {
+						ContentValues values = new ContentValues();
+						values.put(Utils.MESSAGE_ADDRESS, cursor.getString(1));
+						values.put(Utils.MESSAGE_BODY, cursor.getString(3));
+						values.put(Utils.MESSAGE_READ, true);
+						values.put(Utils.MESSAGE_TYPE, Utils.MESSAGE_TYPE_SMS);
+						values.put(Utils.MESSAGE_DATE, cursor.getLong(2));
+						getContentResolver().insert(Uri.parse(Utils.URI_INBOX), values);
+						dao.deleteMessage(cursor.getInt(0));
+					} cursor.moveToNext();
+				} catch (Exception e) {
+					Toast.makeText(getApplicationContext(), getString(R.string.msg_revert_error), Toast.LENGTH_LONG);
+					getContentResolver().delete(Uri.parse(Utils.URI_THREADS + "-1"), null, null);
+					return;
+				} finally {
+					cursor.close();
+				}
+				getContentResolver().delete(Uri.parse(Utils.URI_THREADS + "-1"), null, null);
+				Toast.makeText(getApplicationContext(), getString(R.string.msg_revert_ok), Toast.LENGTH_LONG);
+			}
+		}).start();
 	}
 
 	private void restoreMessage(int messageId) {
